@@ -17,7 +17,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Name Stack',
     'author': 'Trentin Frederick a.k.a. proxe',
-    'version': (0, '8  dev  commit: 485'),
+    'version': (0, '8  dev  commit: 489'),
     'blender': (2, 79, 0),
     'location': '3D View \N{Rightwards Arrow} Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',

@@ -109,12 +109,10 @@ class get:
 
         def remote_string():
 
-            # get remote raw
             # https://raw.githubusercontent.com/proxeIO/name-panel/master/__init__.py
             init_text = requests.get('{}{}/{}/{}/__init__.py'.format(remote['raw'], remote['user'], remote['repo'], remote['branch'])).text
 
-            # get version
-            version = re.search(r'\'version\': [ ,\':()1-9A-z]*', init_text).group()
+            version = re.search(r'\'version\': [ ,\':()0-9A-z]*', init_text).group()
             version = version.split('(')[1][:-2]
             version = version.split(',')[0] + '.' + version.split(',')[1][2:-1]
 
