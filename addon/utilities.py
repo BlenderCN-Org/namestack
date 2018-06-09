@@ -967,30 +967,22 @@ class update:
 
         def __init__(self, context, bl_info):
 
-            current_version = get.version.string(bl_info)
+            current = get.version.string(bl_info)
+            latest = get.version.remote_string()
 
             if self.connection():
-                if current_version != self.version(bl_info):
+                if int(current[-3:]) < int(latest[-3:]):
                     get.preferences(context).update_ready = True
                     # update
                     pass
                 else:
+                    get.preferences(context).update_ready = False
                     # dont update
                     pass
             else:
+                get.preferences(context).update_ready = False
                 # cannot get update info
                 pass
-
-
-        @staticmethod
-        def version(bl_info):
-            current = get.version.string(bl_info)
-            latest = get.version.remote_string()
-
-            if current == latest:
-                return current
-
-            return latest
 
 
         @staticmethod
