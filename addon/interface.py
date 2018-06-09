@@ -10,12 +10,9 @@ class name_panel:
 
 
     def __init__(self, panel, context):
-
-
         self.layout = panel.layout
 
         if get.preferences(context).update_display_panel and get.preferences(context).update_ready:
-
             row = self.layout.row()
             row.alignment = 'CENTER'
             row.scale_y = 2
@@ -23,33 +20,28 @@ class name_panel:
 
 
         self.option = get.name_panel.options(context)
-
         self.find_and_replace(context)
-
         self.layout.separator()
-
         self.name_stack(context)
 
 
     def find_and_replace(self, context):
-
         column = self.layout.column(align=True)
-
         row = column.row(align=True)
-
         row.prop(self.option, 'find', text='', icon='VIEWZOOM')
 
-        if self.option.find: row.operator('view3d.name_panel_clear_find', text='', icon='X')
+        if self.option.find:
+            row.operator('view3d.name_panel_clear_find', text='', icon='X')
 
         row.operator('view3d.name_panel_options', text='', icon='FILTER')
         row.menu('view3d.name_panel_specials', text='', icon='COLLAPSEMENU')
 
         if self.option.find:
             row = column.row(align=True)
-
             row.prop(self.option, 'replace', text='', icon='FILE_REFRESH')
 
-            if self.option.replace: row.operator('view3d.name_panel_clear_replace', text='', icon='X')
+            if self.option.replace:
+                row.operator('view3d.name_panel_clear_replace', text='', icon='X')
 
             sub = row.row(align=True)
             sub.scale_x = 0.2
@@ -58,37 +50,39 @@ class name_panel:
 
 
     def name_stack(self, context):
-
         self.stack = get.name_panel.name_stack(context)
 
         # TODO: add display limit
         if self.stack:
-            for object in self.stack['datablocks']: self.stack_object(self, context, object)
-        else: self.no_stack()
+            for object in self.stack['datablocks']:
+                self.stack_object(self, context, object)
+        else:
+            self.no_stack()
 
 
     def no_stack(self):
-
         option = self.option.filters['options']
 
         row = self.layout.row()
         row.alignment = 'CENTER'
 
+        # TODO: hide names that do not match search in name stack
         # if self.option.find:
         #
         #     row.label(text='No matches found')
 
-        if option.display_mode == 'ACTIVE': row.label(text='No active object')
-        elif option.display_mode == 'SELECTED': row.label(text='No selected objects')
-        else: row.label(text='No visible objects')
+        if option.display_mode == 'ACTIVE':
+            row.label(text='No active object')
+        elif option.display_mode == 'SELECTED':
+            row.label(text='No selected objects')
+        else:
+            row.label(text='No visible objects')
 
         self.layout.separator()
 
 
     def specials(panel, context):
-
         option = get.name_panel.options(context)
-
         layout = panel.layout
 
         layout.label(text='Find & Replace')
@@ -121,7 +115,6 @@ class name_panel:
 
 
         def __init__(self, panel, context, object):
-
             self.option = get.name_panel.options(context).filters['options']
             self.context = context
             self.object = object
@@ -130,8 +123,10 @@ class name_panel:
 
             self.row(panel.stack['objects'], column, self.object, get.icon.object(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
 
-            for type in panel.stack['objects'][object.name]['types']: getattr(self, type)(panel.stack['objects'][object.name][type], column)
-            for _ in range(get.preferences(self.context).separators): panel.layout.separator()
+            for type in panel.stack['objects'][object.name]['types']:
+                getattr(self, type)(panel.stack['objects'][object.name][type], column)
+            for _ in range(get.preferences(self.context).separators):
+                panel.layout.separator()
 
 
         def row(self, location, column, datablock, icon, name_type='name', emboss=False, active=True):
@@ -155,14 +150,16 @@ class name_panel:
 
 
         def groups(self, location, column):
-            for group in location['datablocks']: self.row(location, column, group, get.icon('groups'))
+            for group in location['datablocks']:
+                self.row(location, column, group, get.icon('groups'))
 
 
         def grease_pencils(self, location, column):
 
             self.row(location, column, location['datablocks'][0], get.icon('grease_pencils'))
 
-            for layer in location[location['datablocks'][0].name]['grease_pencil_layers']['datablocks']: self.row(location[location['datablocks'][0].name]['grease_pencil_layers'], column, layer, get.icon('grease_pencil_layers'), name_type='info')
+            for layer in location[location['datablocks'][0].name]['grease_pencil_layers']['datablocks']:
+                self.row(location[location['datablocks'][0].name]['grease_pencil_layers'], column, layer, get.icon('grease_pencil_layers'), name_type='info')
 
 
         def actions(self, location, column):
@@ -170,7 +167,8 @@ class name_panel:
 
 
         def constraints(self, location, column):
-            for constraint in location['datablocks']: self.row(location, column, constraint, get.icon('constraints'))
+            for constraint in location['datablocks']:
+                self.row(location, column, constraint, get.icon('constraints'))
 
 
         def modifiers(self, location, column):
@@ -183,7 +181,8 @@ class name_panel:
                     self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'], column, location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['datablock'], 'DOT')
 
                     if 'textures' in location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]:
-                        for texture in location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures']['datablocks']: self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'], column,  location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'][texture.name]['datablock'], get.icon('textures'))
+                        for texture in location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures']['datablocks']:
+                            self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'], column,  location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'][texture.name]['datablock'], get.icon('textures'))
 
 
         def object_data(self, location, column):
@@ -191,12 +190,14 @@ class name_panel:
 
 
         def bone_groups(self, location, column):
-            for group in location['datablocks']: self.row(location, column, group, get.icon('bone_groups'))
+            for group in location['datablocks']:
+                self.row(location, column, group, get.icon('bone_groups'))
 
 
         def bones(self, location, column): # TODO: implement bones for all armatures in namestack
 
-            if location['datablocks']: column.separator()
+            if location['datablocks']:
+                column.separator()
 
             for bone in location['datablocks']:
                 active_bone = self.context.active_bone if self.context.mode == 'EDIT_ARMATURE' else self.context.active_pose_bone
@@ -204,23 +205,28 @@ class name_panel:
 
                 self.row(location, column, bone, get.icon('bones'), emboss=True if bone_selected or bone == active_bone else False, active=not (bone == active_bone and not bone_selected))
 
-                if 'bone_constraints' in location[bone.name]: self.constraints(location[bone.name]['bone_constraints'], column)
+                if 'bone_constraints' in location[bone.name]:
+                    self.constraints(location[bone.name]['bone_constraints'], column)
 
 
         def shapekeys(self, location, column):
-            for shapekey in location['datablocks']: self.row(location, column, shapekey, get.icon('shapekeys'))
+            for shapekey in location['datablocks']:
+                self.row(location, column, shapekey, get.icon('shapekeys'))
 
 
         def vertex_groups(self, location, column):
-            for vertex_group in location['datablocks']: self.row(location, column, vertex_group, get.icon('vertex_groups'))
+            for vertex_group in location['datablocks']:
+                self.row(location, column, vertex_group, get.icon('vertex_groups'))
 
 
         def uv_maps(self, location, column):
-            for uv_map in location['datablocks']: self.row(location, column, uv_map, get.icon('uv_maps'))
+            for uv_map in location['datablocks']:
+                self.row(location, column, uv_map, get.icon('uv_maps'))
 
 
         def vertex_colors(self, location, column):
-            for vertex_color in location['datablocks']: self.row(location, column, vertex_color, get.icon('vertex_colors'))
+            for vertex_color in location['datablocks']:
+                self.row(location, column, vertex_color, get.icon('vertex_colors'))
 
 
         def materials(self, location, column):
@@ -253,13 +259,15 @@ class name_panel:
                 self.filters(context)
                 self.display_mode(context)
 
-            else: self.extra_options(context)
+            else:
+                self.extra_options(context)
 
 
         @staticmethod
         def set_height(column, separators):
 
-            for _ in range(0, separators): column.separator()
+            for _ in range(0, separators):
+                column.separator()
 
 
         def display_mode(self, context):
@@ -463,24 +471,61 @@ class datablock:
         # this should work with the individual states too such as modifier, if a modifier is pinned after being called from name stack, unless the operator is called again from the stack only show the last pin state, otherwise show the new datablock target and maintain the old pin state
         #XXX: add pin history navigation
     # TODO: Create a properties pop-up that behaves the same as the properties window place it on the search row, right after filters
+
+
     def __init__(self, operator, context):
-        self.override = False
+
+        self.draw_overrides = [
+            'RENDERLAYER_PT_freestyle_lineset',
+            'WORLD_PT_context_world',
+            'WORLD_PT_preview',
+            'WORLD_PT_world',
+            'WORLD_PT_ambient_occlusion',
+            'DATA_PT_modifiers']
+
+        self.header_overrides = [
+            'WORLD_PT_ambient_occlusion',
+            'WORLD_PT_environment_lighting',
+            'WORLD_PT_indirect_lighting',
+            'WORLD_PT_mist']
+
+        self.poll_overrides = [
+            'WORLD_PT_context_world',
+            'WORLD_PT_preview',
+            'WORLD_PT_world',
+            'WORLD_PT_ambient_occlusion',
+            'WORLD_PT_environment_lighting',
+            'WORLD_PT_indirect_lighting',
+            'WORLD_PT_gather',
+            'WORLD_PT_mist',
+            'WORLD_PT_game_context_world',
+            'WORLD_PT_game_environment_lighting',
+            'WORLD_PT_game_mist',
+            'CyclesWorld_PT_preview',
+            'CyclesWorld_PT_surface',
+            'CyclesWorld_PT_volume',
+            'CyclesWorld_PT_ambient_occlusion',
+            'CyclesWorld_PT_mist',
+            'CyclesWorld_PT_ray_visibility',
+            'CyclesWorld_PT_settings']
+
+        self.operator = operator
 
         layout = operator.layout
 
-        option = get.datablock.options(context)
+        self.option = get.datablock.options(context)
 
         row = layout.row(align=True)
-        row.prop(get.datablock.options(context), 'context', text='', expand=True)
+        row.prop(self.option, 'context', text='', expand=True)
         row.menu('view3d.name_panel_specials', text='', icon='COLLAPSEMENU') # TODO: make datablock pop-up specials menu
 
-        box_column = layout.column(align=True)
+        box_column = layout.column()
 
-        panels = getattr(option, option.context.lower())
+        panels = getattr(self.option, self.option.context.lower())
 
-        getattr(self, option.context.lower())(context)
+        getattr(self, self.option.context.lower())(context)
 
-        if not self.override: self.draw_panels(context, panels, box_column)
+        self.draw_panels(context, panels, box_column)
 
 
     def render(self, context):
@@ -501,16 +546,20 @@ class datablock:
         self.draw_modifier_curve_common = bpy.types.RENDERLAYER_PT_freestyle_linestyle.draw_modifier_curve_common
 
 
-    def scene(self, context): pass
+    def scene(self, context):
+        pass
 
 
-    def world(self, context): pass
+    def world(self, context):
+        pass
 
 
-    def object(self, context): pass
+    def object(self, context):
+        pass
 
 
-    def constraint(self, context): pass
+    def constraint(self, context):
+        pass
 
 
     def modifier(self, context):
@@ -569,98 +618,85 @@ class datablock:
         self.CORRECTIVE_SMOOTH = bpy.types.DATA_PT_modifiers.CORRECTIVE_SMOOTH
 
 
-        def modifiers_draw(self, context):
-
-            layout = self.layout
-
-            ob = context.active_object
-
-            layout.operator_menu_enum("object.modifier_add", "type")
-
-            for md in ob.modifiers:
-                box = layout.template_modifier(md)
-                if box:
-                    # match enum type to our functions, avoids a lookup table.
-                    getattr(self, md.type)(self, box, ob, md)
-
-        self.layout = layout.column()
-        modifiers_draw(self, context)
+    def data(self, context):
+        pass
 
 
-    def data(self, context): pass
+    def bone(self, context):
+        pass
 
 
-    def bone(self, context): pass
+    def bone_constraint(self, context):
+        pass
 
 
-    def bone_constraint(self, context): pass
+    def material(self, context):
+        pass
 
 
-    def material(self, context): pass
+    def texture(self, context):
+        pass
 
 
-    def texture(self, context): pass
+    def particles(self, context):
+        pass
 
 
-    def particles(self, context): pass
+    def physics(self, context):
+        pass
 
 
-    def physics(self, context): pass
-
-
-    def draw_panels(self, context, panels, box_column):
+    def draw_panels(self, context, panels, column):
         for panel in panels:
             type = getattr(bpy.types, panel.id)
             if hasattr(type, 'COMPAT_ENGINES'):
                 if context.scene.render.engine in type.COMPAT_ENGINES:
-                    if hasattr(type, 'poll'):
-                        if type.poll(context):
-                            draw_header_overrides = [
-                                '',
-                            ]
-                            draw_overrides = [
-                                'RENDERLAYER_PT_freestyle_lineset',
-                                'WORLD_PT_context_world',
-                            ]
-                            self.draw_box(context, box_column, panel, type)
-                    else: self.draw_box(context, box_column, panel, type)
-            elif hasattr(type, 'poll'):
-                if type.poll(context): self.draw_box(context, box_column, panel, type)
-            else: self.draw_box(context, box_column, panel, type)
-
-        for panel in panels:
-            type = getattr(bpy.types, panel.id)
-            if hasattr(type, 'COMPAT_ENGINES'):
-                if context.scene.render.engine in type.COMPAT_ENGINES:
-                    if hasattr(type, 'poll'):
-                        if type.poll(context):
-                            if panel.id == 'RENDERLAYER_PT_freestyle_lineset': self.draw_box(context, box_column, panel, type, draw=self.freestyle_lineset_draw)
-                            else: self.draw_box(context, box_column, panel, type)
-                    else: self.draw_box(context, box_column, panel, type)
-            elif hasattr(type, 'poll'):
-                if type.poll(context): self.draw_box(context, box_column, panel, type)
-            else: self.draw_box(context, box_column, panel, type)
-
-        for panel in panels:
-            type = getattr(bpy.types, panel.id)
-            if hasattr(type, 'COMPAT_ENGINES'):
-                if context.scene.render.engine in type.COMPAT_ENGINES:
-                    if self.poll_context_world(context):
-                        if panel.id == 'WORLD_PT_context_world': self.draw_box(context, box_column, panel, type, draw=self.draw_context_world)
-                        else: self.draw_box(context, box_column, panel, type)
-                    else: self.draw_box(context, box_column, panel, type)
-            elif hasattr(type, 'poll'):
-                if type.poll(context): self.draw_box(context, box_column, panel, type)
-            else: self.draw_box(context, box_column, panel, type)
+                    if self.poll_check(context, panel, type):
+                        self.draw_panel(context, column, panel, type)
+            elif self.poll_check(context, panel, type):
+                self.draw_panel(context, column, panel, type)
 
 
-    # main
-    def draw_box(self, context, box_column, panel, type, draw_header=False, draw=False):
+    def poll_check(self, context, panel, type):
+        try:
+            if panel.id in self.poll_overrides:
+                if getattr(self, 'poll_{}'.format('_'.join(panel.id.split('_')[2:])))(context):
+                    return True
+                else:
+                    return False
+            else:
+                if hasattr(type, 'poll'):
+                    if type.poll(context):
+                        return True
+                    else:
+                        return False
+                else:
+                    return True
+        except Exception as e:
+            print('\nPoll check fail for {}\n  Reason: {}\n'.format(panel.id, e))
+
+
+    def draw_panel(self, context, column, panel, type):
+        try:
+            if panel.id in self.draw_overrides:
+                self.draw_box(context, column, panel, type, draw=getattr(self, 'draw_{}'.format('_'.join(panel.id.split('_')[2:]))))
+            else:
+                self.draw_box(context, column, panel, type)
+        except Exception as e:
+            print('\nDraw fail for {}\n  Reason: {}\n'.format(panel.id, e))
+
+
+    def draw_box(self, context, column, panel, type, draw_header=None, draw=None):
+
+        box_column = column.column(align=self.option.context not in {'CONSTRAINT', 'MODIFIER'})
 
         if hasattr(type, 'bl_options'):
-            if 'HIDE_HEADER' in getattr(type, 'bl_options'): hidden_header = True
-            else: hidden_header = False
-        else: hidden_header = False
+            if 'HIDE_HEADER' in getattr(type, 'bl_options'):
+                hidden_header = True
+            else:
+                hidden_header = False
+        else:
+            hidden_header = False
 
         if not hidden_header:
             box = box_column.box()
@@ -675,8 +711,10 @@ class datablock:
                 sub = row.row(align=True)
                 sub.scale_x = 0.8
                 self.layout = sub
-                if draw_header: draw_header(context)
-                else: type.draw_header(self, context)
+                if draw_header:
+                    draw_header(context)
+                else:
+                    type.draw_header(self, context)
 
             row.prop(panel, 'collapsed', text=panel.label, toggle=True, emboss=False) # TODO: Run this as a collapse operator, catch event and emulate panel behavior
 
@@ -688,32 +726,35 @@ class datablock:
                 column = box.column()
 
                 self.layout = column
-                if draw: draw(context)
-                else: type.draw(self, context)
+                if draw:
+                    draw(context)
+                else:
+                    type.draw(self, context)
 
         else:
             column = box_column
 
             self.layout = column
-            if draw: draw(context)
-            else: type.draw(self, context)
+            if draw:
+                draw(context)
+            else:
+                type.draw(self, context)
 
-        box_column.separator()
 
-
+    ## overrides ##
     # render
 
 
     # render layer
-    def freestyle_lineset_draw(self, context):
+    def draw_freestyle_lineset(self, context):
         layout = self.layout
 
-        rd = context.scene.render
-        rl = rd.layers.active
-        freestyle = rl.freestyle_settings
+        render = context.scene.render
+        render_layer = render.layers.active
+        freestyle = render_layer.freestyle_settings
         lineset = freestyle.linesets.active
 
-        layout.active = rl.use_freestyle
+        layout.active = render_layer.use_freestyle
 
         row = layout.row()
         rows = 4 if lineset else 2
@@ -729,9 +770,9 @@ class datablock:
             sub.operator("scene.freestyle_lineset_move", icon='TRIA_UP', text="").direction = 'UP'
             sub.operator("scene.freestyle_lineset_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
 
-            col = layout.column()
-            col.label(text="Selection By:")
-            row = col.row(align=True)
+            column = layout.column()
+            column.label(text="Selection By:")
+            row = column.row(align=True)
             row.prop(lineset, "select_by_visibility", text="Visibility", toggle=True)
             row.prop(lineset, "select_by_edge_types", text="Edge Types", toggle=True)
             row.prop(lineset, "select_by_face_marks", text="Face Marks", toggle=True)
@@ -739,21 +780,21 @@ class datablock:
             row.prop(lineset, "select_by_image_border", text="Image Border", toggle=True)
 
             if lineset.select_by_visibility:
-                col.label(text="Visibility:")
-                row = col.row(align=True)
+                column.label(text="Visibility:")
+                row = column.row(align=True)
                 row.prop(lineset, "visibility", expand=True)
                 if lineset.visibility == 'RANGE':
-                    row = col.row(align=True)
+                    row = column.row(align=True)
                     row.prop(lineset, "qi_start")
                     row.prop(lineset, "qi_end")
 
             if lineset.select_by_edge_types:
-                col.label(text="Edge Types:")
-                row = col.row()
+                column.label(text="Edge Types:")
+                row = column.row()
                 row.prop(lineset, "edge_type_negation", expand=True)
                 row.prop(lineset, "edge_type_combination", expand=True)
 
-                split = col.split()
+                split = column.split()
 
                 sub = split.column()
                 self.draw_edge_type_buttons(self, sub, lineset, "silhouette")
@@ -769,14 +810,14 @@ class datablock:
                 self.draw_edge_type_buttons(self, sub, lineset, "material_boundary")
 
             if lineset.select_by_face_marks:
-                col.label(text="Face Marks:")
-                row = col.row()
+                column.label(text="Face Marks:")
+                row = column.row()
                 row.prop(lineset, "face_mark_negation", expand=True)
                 row.prop(lineset, "face_mark_condition", expand=True)
 
             if lineset.select_by_group:
-                col.label(text="Group:")
-                row = col.row()
+                column.label(text="Group:")
+                row = column.row()
                 row.prop(lineset, "group", text="")
                 row.prop(lineset, "group_negation", expand=True)
 
@@ -784,10 +825,10 @@ class datablock:
     def draw_color_modifier(self, context, modifier):
         layout = self.layout
 
-        col = layout.column(align=True)
-        self.draw_modifier_box_header(self, col.box(), modifier)
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
         if modifier.expanded:
-            box = col.box()
+            box = column.box()
             self.draw_modifier_common(self, box, modifier)
 
             if modifier.type == 'ALONG_STROKE':
@@ -844,16 +885,16 @@ class datablock:
                 freestyle = context.scene.render.layers.active.freestyle_settings
                 if not freestyle.use_smoothness:
                     message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, col.box(), modifier, message)
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
     def draw_alpha_modifier(self, context, modifier):
         layout = self.layout
 
-        col = layout.column(align=True)
-        self.draw_modifier_box_header(self, col.box(), modifier)
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
         if modifier.expanded:
-            box = col.box()
+            box = column.box()
             self.draw_modifier_common(self, box, modifier)
 
             if modifier.type == 'ALONG_STROKE':
@@ -900,16 +941,16 @@ class datablock:
                 freestyle = context.scene.render.layers.active.freestyle_settings
                 if not freestyle.use_smoothness:
                     message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, col.box(), modifier, message)
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
     def draw_thickness_modifier(self, context, modifier):
         layout = self.layout
 
-        col = layout.column(align=True)
-        self.draw_modifier_box_header(self, col.box(), modifier)
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
         if modifier.expanded:
-            box = col.box()
+            box = column.box()
             self.draw_modifier_common(self, box, modifier)
 
             if modifier.type == 'ALONG_STROKE':
@@ -973,16 +1014,16 @@ class datablock:
                 freestyle = context.scene.render.layers.active.freestyle_settings
                 if not freestyle.use_smoothness:
                     message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, col.box(), modifier, message)
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
     def draw_geometry_modifier(self, context, modifier):
         layout = self.layout
 
-        col = layout.column(align=True)
-        self.draw_modifier_box_header(self, col.box(), modifier)
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
         if modifier.expanded:
-            box = col.box()
+            box = column.box()
 
             if modifier.type == 'SAMPLING':
                 box.prop(modifier, "sampling")
@@ -992,41 +1033,41 @@ class datablock:
 
             elif modifier.type == 'SINUS_DISPLACEMENT':
                 split = box.split()
-                col = split.column()
-                col.prop(modifier, "wavelength")
-                col.prop(modifier, "amplitude")
-                col = split.column()
-                col.prop(modifier, "phase")
+                column = split.column()
+                column.prop(modifier, "wavelength")
+                column.prop(modifier, "amplitude")
+                column = split.column()
+                column.prop(modifier, "phase")
 
             elif modifier.type == 'SPATIAL_NOISE':
                 split = box.split()
-                col = split.column()
-                col.prop(modifier, "amplitude")
-                col.prop(modifier, "scale")
-                col.prop(modifier, "octaves")
-                col = split.column()
-                col.prop(modifier, "smooth")
-                col.prop(modifier, "use_pure_random")
+                column = split.column()
+                column.prop(modifier, "amplitude")
+                column.prop(modifier, "scale")
+                column.prop(modifier, "octaves")
+                column = split.column()
+                column.prop(modifier, "smooth")
+                column.prop(modifier, "use_pure_random")
 
             elif modifier.type == 'PERLIN_NOISE_1D':
                 split = box.split()
-                col = split.column()
-                col.prop(modifier, "frequency")
-                col.prop(modifier, "amplitude")
-                col.prop(modifier, "seed")
-                col = split.column()
-                col.prop(modifier, "octaves")
-                col.prop(modifier, "angle")
+                column = split.column()
+                column.prop(modifier, "frequency")
+                column.prop(modifier, "amplitude")
+                column.prop(modifier, "seed")
+                column = split.column()
+                column.prop(modifier, "octaves")
+                column.prop(modifier, "angle")
 
             elif modifier.type == 'PERLIN_NOISE_2D':
                 split = box.split()
-                col = split.column()
-                col.prop(modifier, "frequency")
-                col.prop(modifier, "amplitude")
-                col.prop(modifier, "seed")
-                col = split.column()
-                col.prop(modifier, "octaves")
-                col.prop(modifier, "angle")
+                column = split.column()
+                column.prop(modifier, "frequency")
+                column.prop(modifier, "amplitude")
+                column.prop(modifier, "seed")
+                column = split.column()
+                column.prop(modifier, "octaves")
+                column.prop(modifier, "angle")
 
             elif modifier.type == 'BACKBONE_STRETCHER':
                 box.prop(modifier, "backbone_length")
@@ -1130,11 +1171,6 @@ class datablock:
 
 
     # world
-    @staticmethod
-    def poll_context_world(context):
-        return context.scene.world
-
-
     def draw_context_world(self, context):
         layout = self.layout
 
@@ -1142,21 +1178,130 @@ class datablock:
         world = scene.world
         texture_count = world and len(world.texture_slots.keys())
         split = layout.split(percentage=0.85)
-        if scene: split.template_ID(scene, "world", new="world.new")
-        if texture_count: split.label(text=str(texture_count), icon='TEXTURE')
+        if scene:
+            split.template_ID(scene, "world", new="world.new")
+        if texture_count:
+            split.label(text=str(texture_count), icon='TEXTURE')
+
+
+    def draw_preview(self, context): # XXX: crashes blender
+        self.layout.template_preview(context.scene.world)
+
+
+    def draw_world(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        row = layout.row()
+        row.prop(world, "use_sky_paper")
+        row.prop(world, "use_sky_blend")
+        row.prop(world, "use_sky_real")
+
+        row = layout.row()
+        row.column().prop(world, "horizon_color")
+        column = row.column()
+        column.prop(world, "zenith_color")
+        column.active = world.use_sky_blend
+        row.column().prop(world, "ambient_color")
+
+        row = layout.row()
+        row.prop(world, "exposure")
+        row.prop(world, "color_range")
+
+
+    def draw_ambient_occlusion(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+
+        layout.active = light.use_ambient_occlusion
+
+        split = layout.split()
+        split.prop(light, "ao_factor", text="Factor")
+        split.prop(light, "ao_blend_type", text="")
 
 
     @staticmethod
-    def poll_cycles_world_volume(context):
+    def poll_context_world(context):
+        return context.scene.world
+
+
+    @staticmethod
+    def poll_preview(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_world(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_ambient_occlusion(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_environment_lighting(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_indirect_lighting(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_gather(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_mist(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_game_context_world(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_game_environment_lighting(context):
+        return datablock.poll_context_world(context)
+
+
+
+    @staticmethod
+    def poll_game_mist(context):
+        return datablock.poll_context_world(context)
+
+
+    @staticmethod
+    def poll_world_volume(context):
         return context.scene.world.node_tree
 
 
     @staticmethod
-    def poll_cycles_world_mist(context):
+    def poll_world_mist(context):
         for layer in context.scene.render.layers:
             if layer.use_pass_mist:
                 return True
 
+
+    def draw_modifiers(self, context):
+
+        layout = self.layout
+
+        object = context.active_object
+
+        layout.operator_menu_enum("object.modifier_add", "type")
+
+        for modifier in object.modifiers:
+            box = layout.template_modifier(modifier)
+            if box:
+                getattr(self, modifier.type)(self, box, object, modifier)
 
 
 class namer:
@@ -1181,7 +1326,8 @@ class namer:
 
     @staticmethod
     def set_height(column, separators):
-        for _ in range(0, separators): column.separator()
+        for _ in range(0, separators):
+            column.separator()
 
 
     @staticmethod
@@ -1203,12 +1349,16 @@ class namer:
         row = layout.row(align=True)
         row.scale_x = 5
 
-        if category == 'Objects': row.prop(option, 'toggle_objects', text='', icon='RADIOBUT_OFF' if not option.toggle_objects else 'RADIOBUT_ON')
-        elif category == 'Objects Data': row.prop(option, 'toggle_objects_data', text='', icon='RADIOBUT_OFF' if not option.toggle_objects_data else 'RADIOBUT_ON')
+        if category == 'Objects':
+            row.prop(option, 'toggle_objects', text='', icon='RADIOBUT_OFF' if not option.toggle_objects else 'RADIOBUT_ON')
+        elif category == 'Objects Data':
+            row.prop(option, 'toggle_objects_data', text='', icon='RADIOBUT_OFF' if not option.toggle_objects_data else 'RADIOBUT_ON')
         for target in get.namer.catagories[category]:
-            if target not in {'line_sets', 'sensors', 'controllers', 'actuators'}: row.prop(option, target, text='', icon=get.icon(target))
-            elif target == 'line_sets': row.prop(option, target, text='Line Sets', toggle=True)
-            else: row.prop(option, target, text=target.title(), toggle=True)
+            if target not in {'line_sets', 'sensors', 'controllers', 'actuators'}:row.prop(option, target, text='', icon=get.icon(target))
+            elif target == 'line_sets':
+                row.prop(option, target, text='Line Sets', toggle=True)
+            else:
+                row.prop(option, target, text=target.title(), toggle=True)
 
 
     @staticmethod
@@ -1220,7 +1370,8 @@ class namer:
             naming = get.namer.options(context).naming['options']
             option = naming.operations[naming.active_index]
 
-        else: option = get.namer.options(context).sorting['options']
+        else:
+            option = get.namer.options(context).sorting['options']
 
         layout.prop(option, 'case_sensitive')
         layout.prop(option, 're')
@@ -1277,8 +1428,10 @@ class namer:
             self.swap = True if swap else False
             self.move = True if move else False
 
-            if self.sorting and not custom_mode: operation_mode = 'placement'
-            else: operation_mode = '{}_mode'.format(option.operation_options_mode.lower()) if not custom_mode else custom_mode
+            if self.sorting and not custom_mode:
+                operation_mode = 'placement'
+            else:
+                operation_mode = '{}_mode'.format(option.operation_options_mode.lower()) if not custom_mode else custom_mode
 
             split = namer.split_row(column)
             split.prop(option, operation_mode, text='')
@@ -1329,7 +1482,8 @@ class namer:
                 self.search_prop(option, row, 'find')
                 self.search_specials(row)
 
-            else: self.position_prop(option, row)
+            else:
+                self.position_prop(option, row)
 
 
         def find(self, option, row):
@@ -1390,14 +1544,18 @@ class namer:
 
         def prefix(self, option, row):
 
-            if self.sorting: self.separator_prop(option, row)
-            else: self.insert_prop(option, row)
+            if self.sorting:
+                self.separator_prop(option, row)
+            else:
+                self.insert_prop(option, row)
 
 
         def suffix(self, option, row):
 
-            if self.sorting: self.separator_prop(option, row)
-            else: self.insert_prop(option, row)
+            if self.sorting:
+                self.separator_prop(option, row)
+            else:
+                self.insert_prop(option, row)
 
 
     class target:
@@ -1926,7 +2084,8 @@ class namer:
 
 
         @staticmethod
-        def name_slice(option, column): pass
+        def name_slice(option, column):
+            pass
 
 
         @staticmethod
@@ -1946,19 +2105,24 @@ class namer:
 
         def ascend(self, option, column):
 
-            if option.sort_mode == 'ALL': namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
-            else: namer.mode_row(option, column, custom_mode='sort_mode', sorting=True)
+            if option.sort_mode == 'ALL':
+                namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
+            else:
+                namer.mode_row(option, column, custom_mode='sort_mode', sorting=True)
 
 
         def descend(self, option, column):
 
-            if option.sort_mode == 'ALL': namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
-            else: namer.mode_row(option, column, custom_mode='sort_mode')
+            if option.sort_mode == 'ALL':
+                namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
+            else:
+                namer.mode_row(option, column, custom_mode='sort_mode')
 
 
         def position(self, option, column): # TODO: orientation? contains, rotation, scale, location modes, from viewport perspective?
 
-            if option.display_options: getattr(self, option.fallback_mode.lower())(option, column)
+            if option.display_options:
+                getattr(self, option.fallback_mode.lower())(option, column)
             else:
                 split = namer.split_row(column)
                 split.prop(option, 'starting_point', text='')
@@ -1969,9 +2133,12 @@ class namer:
                 if option.starting_point in {'CURSOR', 'CENTER', 'ACTIVE'}:
                     column.separator()
 
-                    if option.axis_3d == 'Z': props = ['top', 'bottom']
-                    elif option.axis_3d == 'Y': props = ['front', 'back']
-                    else: props = ['left', 'right']
+                    if option.axis_3d == 'Z':
+                        props = ['top', 'bottom']
+                    elif option.axis_3d == 'Y':
+                        props = ['front', 'back']
+                    else:
+                        props = ['left', 'right']
 
                     split = namer.split_row(column, offset=-0.01)
                     split.label(text=props[0].title() + ':')
@@ -1999,7 +2166,8 @@ class namer:
 
         def hierarchy(self, option, column):
 
-            if option.display_options: getattr(self, option.fallback_mode.lower())(option, column)
+            if option.display_options:
+                getattr(self, option.fallback_mode.lower())(option, column)
             else:
                 row = column.row()
                 row.prop(option, 'hierarchy_mode', expand=True)

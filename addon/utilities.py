@@ -63,18 +63,28 @@ class regex:
 
         if option.find:
             if option.regex:
-                if option.case_sensitive: return re.search(option.find, name) != None
-                else: return re.search(option.find, name, re.I) != None
-            elif option.case_sensitive: return re.search(re.escape(option.find), name) != None
-            else: return re.search(re.escape(option.find), name, re.I) != None
-        else: return True
+                if option.case_sensitive:
+                    return re.search(option.find, name) != None
+
+                else:
+                    return re.search(option.find, name, re.I) != None
+
+            elif option.case_sensitive:
+                return re.search(re.escape(option.find), name) != None
+
+            else:
+                return re.search(re.escape(option.find), name, re.I) != None
+
+        else:
+            return True
 
 
 class get:
 
 
     @classmethod
-    def item_panel_poll(cls, context): return (context.space_data and context.active_object)
+    def item_panel_poll(cls, context):
+        return (context.space_data and context.active_object)
 
 
     @classmethod
@@ -93,7 +103,8 @@ class get:
     class version:
 
 
-        def string(bl_info): return '{}.{}'.format(str(bl_info['version'][0]), bl_info['version'][1])
+        def string(bl_info):
+            return '{}.{}'.format(str(bl_info['version'][0]), bl_info['version'][1])
 
 
         def remote_string():
@@ -110,7 +121,8 @@ class get:
             return version
 
 
-        def remote_info(): return requests.get('{}{}/{}/{}/update_info'.format(remote['raw'], remote['user'], remote['repo'], remote['branch'])).text
+        def remote_info():
+            return requests.get('{}{}/{}/{}/update_info'.format(remote['raw'], remote['user'], remote['repo'], remote['branch'])).text
 
 
     class identifier:
@@ -122,15 +134,22 @@ class get:
 
             self.check_bases(self, datablock.rna_type.base)
 
-            if self.identifiers[-1] == 'ID': identifier = self.identifiers[-2]
-            else: identifier = self.identifiers[-1]
+            if self.identifiers[-1] == 'ID':
+                identifier = self.identifiers[-2]
+
+            else:
+                identifier = self.identifiers[-1]
+
             return identifier
 
 
         def check_bases(self, base):
 
-            if hasattr(base, 'identifier'): self.identifiers.append(base.identifier)
-            if hasattr(base, 'base'): self.check_bases(self, base.base)
+            if hasattr(base, 'identifier'):
+                self.identifiers.append(base.identifier)
+
+            if hasattr(base, 'base'):
+                self.check_bases(self, base.base)
 
 
     class icon:
@@ -416,7 +435,9 @@ class get:
                         stack = {}
 
                 if 'datablocks' in stack:
-                    if context.active_object and get.preferences(context).pin_active and option.display_mode != 'ACTIVE': stack['datablocks'].insert(0, context.active_object)
+                    if context.active_object and get.preferences(context).pin_active and option.display_mode != 'ACTIVE':
+                        stack['datablocks'].insert(0, context.active_object)
+
                     for object in stack['datablocks']:
                         stack['objects'][object.name] = {
                             'datablock': object,
@@ -438,7 +459,8 @@ class get:
                                                     'datablock': datablock,
                                                     'active': regex.panel_search(context, datablock.name)}
 
-                                                if type in {'grease_pencils', 'modifiers', 'bones', 'materials'}: self.subtypes(context, option, stack, object, type, datablock)
+                                                if type in {'grease_pencils', 'modifiers', 'bones', 'materials'}:
+                                                    self.subtypes(context, option, stack, object, type, datablock)
 
                             elif object.type == 'EMPTY':
                                 if object.empty_draw_type == 'IMAGE':
@@ -463,25 +485,32 @@ class get:
                 return stack
 
 
-            def objects(context, option, location): return sorted([object for object in location if object != context.active_object], key=lambda object: object.name) if get.preferences(context).pin_active else sorted([object for object in location], key=lambda object: object.name)
+            def objects(context, option, location):
+                return sorted([object for object in location if object != context.active_object], key=lambda object: object.name) if get.preferences(context).pin_active else sorted([object for object in location], key=lambda object: object.name)
 
 
-            def groups(context, object): return [group for group in bpy.data.groups for group_object in group.objects if group_object == object] if bpy.data.groups else []
+            def groups(context, object):
+                return [group for group in bpy.data.groups for group_object in group.objects if group_object == object] if bpy.data.groups else []
 
 
-            def grease_pencils(context, object): return [object.grease_pencil] if hasattr(object.grease_pencil, 'name') else []
+            def grease_pencils(context, object):
+                return [object.grease_pencil] if hasattr(object.grease_pencil, 'name') else []
 
 
-            def actions(context, object): return [object.animation_data.action] if hasattr(object.animation_data, 'action') and hasattr(object.animation_data.action, 'name') else []
+            def actions(context, object):
+                return [object.animation_data.action] if hasattr(object.animation_data, 'action') and hasattr(object.animation_data.action, 'name') else []
 
 
-            def constraints(context, object): return [constraint for constraint in object.constraints]
+            def constraints(context, object):
+                return [constraint for constraint in object.constraints]
 
 
-            def modifiers(context, object): return [modifier for modifier in object.modifiers]
+            def modifiers(context, object):
+                return [modifier for modifier in object.modifiers]
 
 
-            def images(context, object): return [object.data] if object.type == 'EMPTY' and object.empty_draw_type == 'IMAGE' and hasattr(object, 'data') else []
+            def images(context, object):
+                return [object.data] if object.type == 'EMPTY' and object.empty_draw_type == 'IMAGE' and hasattr(object, 'data') else []
 
 
             def bone_groups(context, object):
@@ -491,7 +520,8 @@ class get:
 
                     return [bone_group for bone_group in object.pose.bone_groups]
 
-                else: return []
+                else:
+                    return []
 
 
             def bones(context, object):
@@ -531,19 +561,24 @@ class get:
                 return bones
 
 
-            def vertex_groups(context, object): return [vertex_group for vertex_group in object.vertex_groups] if hasattr(object, 'vertex_groups') else []
+            def vertex_groups(context, object):
+                return [vertex_group for vertex_group in object.vertex_groups] if hasattr(object, 'vertex_groups') else []
 
 
-            def shapekeys(context, object): return [shape_key for shape_key in object.data.shape_keys.key_blocks] if hasattr(object.data, 'shape_keys') and hasattr(object.data.shape_keys, 'key_blocks') else []
+            def shapekeys(context, object):
+                return [shape_key for shape_key in object.data.shape_keys.key_blocks] if hasattr(object.data, 'shape_keys') and hasattr(object.data.shape_keys, 'key_blocks') else []
 
 
-            def uv_maps(context, object): return [uv_map for uv_map in object.data.uv_textures] if object.type == 'MESH' else []
+            def uv_maps(context, object):
+                return [uv_map for uv_map in object.data.uv_textures] if object.type == 'MESH' else []
 
 
-            def vertex_colors(context, object): return [vertex_color for vertex_color in object.data.vertex_colors] if object.type == 'MESH' else []
+            def vertex_colors(context, object):
+                return [vertex_color for vertex_color in object.data.vertex_colors] if object.type == 'MESH' else []
 
 
-            def materials(context, object): return [material_slot.material for material_slot in object.material_slots if material_slot != None]
+            def materials(context, object):
+                return [material_slot.material for material_slot in object.material_slots if material_slot != None]
 
 
             def subtypes(context, option, stack, object, type, datablock):
@@ -606,91 +641,120 @@ class get:
         class target:
 
 
-            def __new__(self, operator, context): return getattr(self, operator.identifier)(operator, context)
+            def __new__(self, operator, context):
+                return getattr(self, operator.identifier)(operator, context)
 
 
-            def Object(operator, context): return context.active_object
+            def Object(operator, context):
+                return context.active_object
 
 
-            def Mesh(operator, context): return context.active_object.data
+            def Mesh(operator, context):
+                return context.active_object.data
 
 
-            def Curve(operator, context): return context.active_object.data
+            def Curve(operator, context):
+                return context.active_object.data
 
 
-            def MetaBall(operator, context): return context.active_object.data
+            def MetaBall(operator, context):
+                return context.active_object.data
 
 
-            def Armature(operator, context): return context.active_object.data
+            def Armature(operator, context):
+                return context.active_object.data
 
 
-            def Lattice(operator, context): return context.active_object.data
+            def Lattice(operator, context):
+                return context.active_object.data
 
 
-            def Empty(operator, context): return context.active_object.data
+            def Empty(operator, context):
+                return context.active_object.data
 
 
-            def Speaker(operator, context): return context.active_object.data
+            def Speaker(operator, context):
+                return context.active_object.data
 
 
-            def Camera(operator, context): return context.active_object.data
+            def Camera(operator, context):
+                return context.active_object.data
 
 
-            def Lamp(operator, context): return context.active_object.data
+            def Lamp(operator, context):
+                return context.active_object.data
 
 
-            def Group(operator, context): return bpy.data.groups[operator.target_name]
+            def Group(operator, context):
+                return bpy.data.groups[operator.target_name]
 
 
-            def GreasePencil(operator, context): return context.active_object.grease_pencil
+            def GreasePencil(operator, context):
+                return context.active_object.grease_pencil
 
 
-            def GPencilLayer(operator, context): return context.active_object.grease_pencil.layers[operator.target_name]
+            def GPencilLayer(operator, context):
+                return context.active_object.grease_pencil.layers[operator.target_name]
 
 
-            def Action(operator, context): return context.active_object.animation_data.action
+            def Action(operator, context):
+                return context.active_object.animation_data.action
 
 
-            def Constraint(operator, context): return context.active_object.constraints[operator.target_name]
+            def Constraint(operator, context):
+                return context.active_object.constraints[operator.target_name]
 
 
-            def Modifier(operator, context): return context.active_object.modifiers[operator.target_name]
+            def Modifier(operator, context):
+                return context.active_object.modifiers[operator.target_name]
 
 
-            def Image(operator, context): return context.active_object.data
+            def Image(operator, context):
+                return context.active_object.data
 
 
-            def BoneGroup(operator, context): return context.active_object.pose.bone_groups[operator.target_name]
+            def BoneGroup(operator, context):
+                return context.active_object.pose.bone_groups[operator.target_name]
 
 
-            def PoseBone(operator, context): return context.active_pose_bone
+            def PoseBone(operator, context):
+                return context.active_pose_bone
 
 
-            def EditBone(operator, context): return context.active_bone
+            def EditBone(operator, context):
+                return context.active_bone
 
 
-            def VertexGroup(operator, context): return context.active_object.vertex_groups[operator.target_name]
+            def VertexGroup(operator, context):
+                return context.active_object.vertex_groups[operator.target_name]
 
 
-            def ShapeKey(operator, context): return context.active_object.data.shape_keys.key_blocks[operator.target_name]
+            def ShapeKey(operator, context):
+                return context.active_object.data.shape_keys.key_blocks[operator.target_name]
 
 
-            def MeshTexturePolyLayer(operator, context): return context.active_object.data.uv_textures[operator.target_name]
+            def MeshTexturePolyLayer(operator, context):
+                return context.active_object.data.uv_textures[operator.target_name]
 
 
-            def MeshLoopColorLayer(operator, context): return context.active_object.data.vertex_colors[operator.target_name]
+            def MeshLoopColorLayer(operator, context):
+                return context.active_object.data.vertex_colors[operator.target_name]
 
 
-            def Material(operator, context): return context.active_object.materials[operator.target_name]
+            def Material(operator, context):
+                return context.active_object.materials[operator.target_name]
 
 
-            def Texture(operator, context): return bpy.data.textures[operator.texture_name]
+            def Texture(operator, context):
+                return bpy.data.textures[operator.texture_name]
 
 
-            def ParticleSystem(operator, context): return context.active_object.particle_systems[operator.target_name]
+            def ParticleSystem(operator, context):
+                return context.active_object.particle_systems[operator.target_name]
 
 
-            def ParticleSettings(operator, context): return bpy.data.particles[operator.target_name]
+            def ParticleSettings(operator, context):
+                return bpy.data.particles[operator.target_name]
 
 
     class namer:
@@ -798,7 +862,9 @@ class get:
                 location['options'].sorting.add().name = 'options'
                 location['options'].counting.add().name = 'options'
 
-            if not location['options'].naming['options'].operations: location['options'].naming['options'].operations.add().name = 'Default'
+            if not location['options'].naming['options'].operations:
+                location['options'].naming['options'].operations.add().name = 'Default'
+
             return location['options']
 
 
@@ -808,17 +874,27 @@ class get:
                 mode = '{}_mode'.format(operation.operation_options_mode.lower())
                 filler = ' at ' if mode == 'insert_mode' and operation.insert_mode == 'POSITION' else ' '
 
-                if mode in {'replace_mode', 'move_mode', 'swap_mode'} and getattr(operation, mode) == 'FIND': secondary = filler + 'Found'
-                else: secondary = filler + getattr(operation, mode).title()
-            elif operation.operation_options_mode == 'CONVERT':
+                if mode in {'replace_mode', 'move_mode', 'swap_mode'} and getattr(operation, mode) == 'FIND':
+                    secondary = filler + 'Found'
 
+                else:
+                    secondary = filler + getattr(operation, mode).title()
+
+            elif operation.operation_options_mode == 'CONVERT':
                 secondary = ''
 
-                if operation.case_mode != 'NONE': secondary = ' Case'
+                if operation.case_mode != 'NONE':
+                    secondary = ' Case'
+
                 if operation.separate_mode != 'NONE':
-                    if secondary != '': secondary += ' & Separators'
-                    else: secondary = ' Separators'
-            else: secondary = ''
+                    if secondary != '':
+                        secondary += ' & Separators'
+
+                    else:
+                        secondary = ' Separators'
+            else:
+                secondary = ''
+
             return operation.operation_options_mode.title() + secondary
 
 
@@ -858,10 +934,18 @@ class get:
                 items.append(('OBJECT', 'Object', '', 'OBJECT_DATA', 4))
                 items.append(('CONSTRAINT', 'Constraint', '', 'CONSTRAINT', 5))
 
-                if context.active_object.type in {'CURVE', 'LATTICE', 'MESH', 'SURFACE', 'FONT'}: items.append(('MODIFIER', 'Modifier', '', 'MODIFIER', 6))
-                if context.active_object.type in {'CURVE', 'SURFACE', 'FONT'}: items.append(('DATA', 'Data', '', 'CURVE_DATA', 7))
-                else: items.append(('DATA', 'Data', '', '{}_DATA'.format(context.active_object.type), 7))
-                if context.active_object.type in {'CURVE', 'MESH', 'META', 'SURFACE', 'FONT'}: items.append(('MATERIAL', 'Material', '', 'MATERIAL_DATA', 8))
+                if context.active_object.type in {'CURVE', 'LATTICE', 'MESH', 'SURFACE', 'FONT'}:
+                    items.append(('MODIFIER', 'Modifier', '', 'MODIFIER', 6))
+
+                if context.active_object.type in {'CURVE', 'SURFACE', 'FONT'}:
+                    items.append(('DATA', 'Data', '', 'CURVE_DATA', 7))
+
+                else:
+                    items.append(('DATA', 'Data', '', '{}_DATA'.format(context.active_object.type), 7))
+
+                if context.active_object.type in {'CURVE', 'MESH', 'META', 'SURFACE', 'FONT'}:
+                    items.append(('MATERIAL', 'Material', '', 'MATERIAL_DATA', 8))
+
                 if context.active_object.type == 'ARMATURE':
                     items.append(('BONE', 'Bone', '', 'BONE_DATA', 9))
                     items.append(('BONE_CONSTRAINT', 'Bone Constraints', '', 'CONSTRAINT_BONE', 9))
@@ -869,7 +953,8 @@ class get:
             items.append(('TEXTURE', 'Texture', '', 'TEXTURE_DATA', 11))
 
             if context.active_object:
-                if context.active_object.type == 'MESH': items.append(('PARTICLES', 'Particles', '', 'PARTICLE_DATA', 10))
+                if context.active_object.type == 'MESH':
+                    items.append(('PARTICLES', 'Particles', '', 'PARTICLE_DATA', 10))
 
                 items.append(('PHYSICS', 'Physics', '', 'PHYSICS', 11))
 
@@ -904,7 +989,9 @@ class update:
             current = get.version.string(bl_info)
             latest = get.version.remote_string()
 
-            if current == latest: return current
+            if current == latest:
+                return current
+
             return latest
 
 
@@ -935,29 +1022,38 @@ class update:
 
 
     def item_panel_poll(restore=False):
+        if restore:
+            bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll
 
-        if restore: bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll
-        else: bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll_override
+        else:
+            bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll_override
 
 
     def prop_item_panel_poll(scene, context):
+        if get.preferences(context).remove_item_panel:
+            bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll_override
 
-        if get.preferences(context).remove_item_panel: bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll_override
-        else: bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll
+        else:
+            bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll
 
 
     def keymap(context, remove=False):
-
         keymap = context.window_manager.keyconfigs.addon.keymaps.new(name='Window')
 
         if remove:
-            if 'wm.datablock_settings' in keymap.keymap_items: keymap.keymap_items.remove(keymap.keymap_items['wm.namer'])
-            if 'wm.name' in keymap.keymap_items: keymap.keymap_items.remove(keymap.keymap_items['wm.datablock_settings'])
+            if 'wm.datablock_settings' in keymap.keymap_items:
+                keymap.keymap_items.remove(keymap.keymap_items['wm.namer'])
+
+            if 'wm.name' in keymap.keymap_items:
+                keymap.keymap_items.remove(keymap.keymap_items['wm.datablock_settings'])
+
         else:
             if 'wm.datablock_settings' not in keymap.keymap_items:
                 kmi = keymap.keymap_items.new('wm.datablock_settings', 'F7', 'PRESS')
                 kmi.properties.object_name = ''
-            if 'wm.name' not in keymap.keymap_items: keymap.keymap_items.new('wm.namer', 'NONE', 'PRESS')
+
+            if 'wm.name' not in keymap.keymap_items:
+                keymap.keymap_items.new('wm.namer', 'NONE', 'PRESS')
 
 
 
@@ -977,7 +1073,8 @@ class update:
 
                 bpy.ops.object.mode_set(mode='OBJECT')
 
-            else: objects[operator.object_name].select = object_selected if event.shift else True
+            else:
+                objects[operator.object_name].select = object_selected if event.shift else True
 
             if not event.shift:
                 for object in objects:
@@ -992,7 +1089,9 @@ class update:
                 bones.active = bones[operator.target_name]
                 bones[operator.target_name].select = bone_selected if event.shift else True
 
-            else: bones.active.select = bone_selected if event.shift else True
+            else:
+                bones.active.select = bone_selected if event.shift else True
+
             if not event.shift:
                 for bone in context.visible_pose_bones:
                     if bones[bone.name] != bones[operator.target_name]:
@@ -1051,9 +1150,12 @@ class update:
             'particle_systems']
 
         if option.toggle_all:
-            for toggle in toggles: setattr(option, toggle, True)
+            for toggle in toggles:
+                setattr(option, toggle, True)
+
         else:
-            for toggle in toggles: setattr(option, toggle, False)
+            for toggle in toggles:
+                setattr(option, toggle, False)
 
 
     def target_options(operator, context):
@@ -1061,10 +1163,17 @@ class update:
         option = get.namer.options(context).targeting['options']
 
         if option.toggle_objects:
-            for target in get.namer.catagories['Objects']: setattr(option, target, True)
+            for target in get.namer.catagories['Objects']:
+                setattr(option, target, True)
+
         else:
-            for target in get.namer.catagories['Objects']: setattr(option, target, False)
+            for target in get.namer.catagories['Objects']:
+                setattr(option, target, False)
+
         if option.toggle_objects_data:
-            for target in get.namer.catagories['Objects Data']: setattr(option, target, True)
+            for target in get.namer.catagories['Objects Data']:
+                setattr(option, target, True)
+
         else:
-            for target in get.namer.catagories['Objects Data']: setattr(option, target, False)
+            for target in get.namer.catagories['Objects Data']:
+                setattr(option, target, False)

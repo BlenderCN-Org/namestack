@@ -12,7 +12,8 @@ class name_panel_specials(Menu):
     bl_description = 'Tools and Options'
 
 
-    def draw(self, context): interface.name_panel.specials(self, context)
+    def draw(self, context):
+        interface.name_panel.specials(self, context)
 
 
 class namer_search_specials(Menu):
@@ -20,7 +21,8 @@ class namer_search_specials(Menu):
     bl_label = 'Search Options'
 
 
-    def draw(self, context): interface.namer.search_specials(self, context)
+    def draw(self, context):
+        interface.namer.search_specials(self, context)
 
 
 class move_search_specials(Menu):
@@ -28,7 +30,8 @@ class move_search_specials(Menu):
     bl_label = 'Search Options'
 
 
-    def draw(self, context): interface.namer.move_search_specials(self, context)
+    def draw(self, context):
+        interface.namer.move_search_specials(self, context)
 
 
 class swap_search_specials(Menu):
@@ -36,7 +39,8 @@ class swap_search_specials(Menu):
     bl_label = 'Search Options'
 
 
-    def draw(self, context): interface.namer.swap_search_specials(self, context)
+    def draw(self, context):
+        interface.namer.swap_search_specials(self, context)
 
 
 class operation_specials(Menu):
@@ -44,4 +48,5 @@ class operation_specials(Menu):
     bl_label = 'Name Operation Specials'
 
 
-    def draw(self, context): interface.namer.operation_specials(self, context)
+    def draw(self, context):
+        interface.namer.operation_specials(self, context)

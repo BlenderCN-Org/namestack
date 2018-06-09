@@ -15,9 +15,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 bl_info = {
-    'name': 'Name Panel',
+    'name': 'Name Stack',
     'author': 'Trentin Frederick a.k.a. proxe',
-    'version': (1, '8  dev  commit: 485'),
+    'version': (0, '8  dev  commit: 485'),
     'blender': (2, 79, 0),
     'location': '3D View \N{Rightwards Arrow} Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',
@@ -39,8 +39,12 @@ def register():
 
     context = bpy.context
     update.handlers(context)
-    if get.preferences(context).update_check: update.check(context, bl_info)
-    if get.preferences(context).remove_item_panel: update.item_panel_poll()
+
+    if get.preferences(context).update_check:
+        update.check(context, bl_info)
+
+    if get.preferences(context).remove_item_panel:
+        update.item_panel_poll()
 
     bpy.types.WindowManager.name_panel = PointerProperty(
         type = properties.name_panel,

@@ -15,7 +15,8 @@ class tool_shelf(Panel):
 
 
     @classmethod
-    def poll(cls, context): return get.preferences(context).location == 'TOOLS'
+    def poll(cls, context):
+        return get.preferences(context).location == 'TOOLS'
 
 
     def draw(self, context):
@@ -30,7 +31,8 @@ class property_shelf(Panel):
 
 
     @classmethod
-    def poll(cls, context): return get.preferences(context).location == 'UI'
+    def poll(cls, context):
+        return get.preferences(context).location == 'UI'
 
 
     def draw(self, context):

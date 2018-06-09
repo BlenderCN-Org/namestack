@@ -72,7 +72,7 @@ default_panels = (
     ('WORLD', 'WORLD_PT_game_environment_lighting'),
     ('WORLD', 'WORLD_PT_game_mist'),
     ('WORLD', 'WORLD_PT_context_world'),
-    ('WORLD', 'WORLD_PT_preview'),
+    # ('WORLD', 'WORLD_PT_preview'),
     ('WORLD', 'WORLD_PT_world'),
     ('WORLD', 'WORLD_PT_ambient_occlusion'),
     ('WORLD', 'WORLD_PT_environment_lighting'),

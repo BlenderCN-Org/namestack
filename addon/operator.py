@@ -41,7 +41,8 @@ class options(Operator):
     bl_description = 'Adjust display options for the name stack'
 
 
-    def check(self, context): return True
+    def check(self, context):
+        return True
 
 
     def draw(self, context):
@@ -55,7 +56,8 @@ class options(Operator):
         return {'RUNNING_MODAL'}
 
 
-    def execute(self, context): return {'FINISHED'}
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class datablock_settings(Operator):
@@ -90,7 +92,8 @@ class datablock_settings(Operator):
         default = '')
 
 
-    def check(self, context): return True
+    def check(self, context):
+        return True
 
 
     def draw(self, context):
@@ -110,8 +113,10 @@ class datablock_settings(Operator):
                 if event.ctrl:
                     context.window_manager.invoke_popup(self, width=get.preferences(context).datablock_popup_width)
                     return {'RUNNING_MODAL'}
-                else: return {'FINISHED'}
-            elif event.ctrl: return {'FINISHED'}
+                else:
+                    return {'FINISHED'}
+            elif event.ctrl:
+                return {'FINISHED'}
             else:
                 context.window_manager.invoke_popup(self, width=get.preferences(context).datablock_popup_width)
                 return {'RUNNING_MODAL'}
@@ -121,7 +126,8 @@ class datablock_settings(Operator):
         return {'RUNNING_MODAL'}
 
 
-    def execute(self, context): return {'FINISHED'}
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class namer(Operator):
@@ -130,7 +136,8 @@ class namer(Operator):
     bl_description = 'Batch name datablocks'
 
 
-    def check(self, context): return True
+    def check(self, context):
+        return True
 
 
     def draw(self, context):
@@ -146,7 +153,8 @@ class namer(Operator):
         return {'RUNNING_MODAL'}
 
 
-    def execute(self, context): return {'FINISHED'}
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class operation_add(Operator):
@@ -246,7 +254,8 @@ class operation_rename_all(Operator):
 
         naming = get.namer.options(context).naming['options']
 
-        for operation in naming.operations: operation.name = get.namer.operation_name(operation)
+        for operation in naming.operations:
+            operation.name = get.namer.operation_name(operation)
         return {'FINISHED'}
 
 
@@ -281,7 +290,8 @@ class update_info(Operator):
     bl_options = {'INTERNAL'}
 
 
-    def check(self, context): return True
+    def check(self, context):
+        return True
 
 
     def draw(self, context):
@@ -322,7 +332,8 @@ class update_info(Operator):
         return {'RUNNING_MODAL'}
 
 
-    def execute(self, context): return {'FINISHED'}
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class update_confirm(Operator):
@@ -332,7 +343,8 @@ class update_confirm(Operator):
     bl_options = {'INTERNAL'}
 
 
-    def check(self, context): return True
+    def check(self, context):
+        return True
 
 
     def draw(self, context):
@@ -351,4 +363,5 @@ class update_confirm(Operator):
         return {'RUNNING_MODAL'}
 
 
-    def execute(self, context): return {'FINISHED'}
+    def execute(self, context):
+        return {'FINISHED'}
