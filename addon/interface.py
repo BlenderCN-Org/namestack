@@ -6,7 +6,7 @@ from .utilities import get
 from .config import remote
 
 
-class name_panel:
+class name_stack:
 
 
     def __init__(self, panel, context):
@@ -16,10 +16,10 @@ class name_panel:
             row = self.layout.row()
             row.alignment = 'CENTER'
             row.scale_y = 2
-            row.operator('wm.name_panel_update_info', text='Update Available!', icon='ERROR', emboss=False)
+            row.operator('wm.name_stack_update_info', text='Update Available!', icon='ERROR', emboss=False)
 
 
-        self.option = get.name_panel.options(context)
+        self.option = get.name_stack.options(context)
         self.find_and_replace(context)
         self.layout.separator()
         self.name_stack(context)
@@ -31,26 +31,26 @@ class name_panel:
         row.prop(self.option, 'find', text='', icon='VIEWZOOM')
 
         if self.option.find:
-            row.operator('view3d.name_panel_clear_find', text='', icon='X')
+            row.operator('view3d.name_stack_clear_find', text='', icon='X')
 
-        row.operator('view3d.name_panel_options', text='', icon='FILTER')
-        row.menu('view3d.name_panel_specials', text='', icon='COLLAPSEMENU')
+        row.operator('view3d.name_stack_options', text='', icon='FILTER')
+        row.menu('view3d.name_stack_specials', text='', icon='COLLAPSEMENU')
 
         if self.option.find:
             row = column.row(align=True)
             row.prop(self.option, 'replace', text='', icon='FILE_REFRESH')
 
             if self.option.replace:
-                row.operator('view3d.name_panel_clear_replace', text='', icon='X')
+                row.operator('view3d.name_stack_clear_replace', text='', icon='X')
 
             sub = row.row(align=True)
             sub.scale_x = 0.2
 
-            sub.operator('view3d.name_panel_options', text='OK')
+            sub.operator('view3d.name_stack_options', text='OK')
 
 
     def name_stack(self, context):
-        self.stack = get.name_panel.name_stack(context)
+        self.stack = get.name_stack.name_stack(context)
 
         # TODO: add display limit
         if self.stack:
@@ -82,7 +82,7 @@ class name_panel:
 
 
     def specials(panel, context):
-        option = get.name_panel.options(context)
+        option = get.name_stack.options(context)
         layout = panel.layout
 
         layout.label(text='Find & Replace')
@@ -108,14 +108,14 @@ class name_panel:
         if get.preferences(context).update_display_menu and get.preferences(context).update_ready:
             layout.separator()
 
-            layout.operator('wm.name_panel_update_info', text='Update Available!', icon='ERROR')
+            layout.operator('wm.name_stack_update_info', text='Update Available!', icon='ERROR')
 
 
     class stack_object:
 
 
         def __init__(self, panel, context, object):
-            self.option = get.name_panel.options(context).filters['options']
+            self.option = get.name_stack.options(context).filters['options']
             self.context = context
             self.object = object
 
@@ -245,7 +245,7 @@ class name_panel:
 
         def __init__(self, operator, context):
 
-            self.option = get.name_panel.options(context).filters['options']
+            self.option = get.name_stack.options(context).filters['options']
 
             split = operator.layout.column().split(percentage=0.15)
             column = split.column()
@@ -517,7 +517,7 @@ class datablock:
 
         row = layout.row(align=True)
         row.prop(self.option, 'context', text='', expand=True)
-        row.menu('view3d.name_panel_specials', text='', icon='COLLAPSEMENU') # TODO: make datablock pop-up specials menu
+        row.menu('view3d.name_stack_specials', text='', icon='COLLAPSEMENU') # TODO: make datablock pop-up specials menu
 
         box_column = layout.column()
 

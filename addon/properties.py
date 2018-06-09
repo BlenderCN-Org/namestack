@@ -1103,7 +1103,7 @@ class namer_options(PropertyGroup):
         type = count_options)
 
 
-class name_panel(PropertyGroup):
+class name_stack(PropertyGroup):
 
     panel = CollectionProperty(
         name = 'Panel',

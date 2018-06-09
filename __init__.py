@@ -17,7 +17,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Name Stack',
     'author': 'Trentin Frederick a.k.a. proxe',
-    'version': (0, '8  dev  commit: 490'),
+    'version': (0, '8  dev  commit: 491'),
     'blender': (2, 79, 4),
     'location': '3D View \N{Rightwards Arrow} Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',
@@ -46,8 +46,8 @@ def register():
     if get.preferences(context).remove_item_panel:
         update.item_panel_poll()
 
-    bpy.types.WindowManager.name_panel = PointerProperty(
-        type = properties.name_panel,
+    bpy.types.WindowManager.name_stack = PointerProperty(
+        type = properties.name_stack,
         name = 'Name Panel Addon',
         description = 'Storage location for name panel addon options')
 
@@ -60,7 +60,7 @@ def unregister():
     update.handlers(context, remove=True)
     update.item_panel_poll(restore=True)
 
-    del bpy.types.WindowManager.name_panel
+    del bpy.types.WindowManager.name_stack
 
     update.keymap(context, remove=True)
 

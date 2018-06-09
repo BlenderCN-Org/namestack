@@ -13,7 +13,7 @@ from .config import default_panels, defaults, remote
 def keep_session_settings(none):
 
     preferences = get.preferences(bpy.context)
-    panel = get.name_panel.options(bpy.context)
+    panel = get.name_stack.options(bpy.context)
     filters = panel.filters['options']
 
     defaults['preferences']['location'] = preferences.location
@@ -59,7 +59,7 @@ class regex:
 
     def panel_search(context, name):
 
-        option = get.name_panel.options(context)
+        option = get.name_stack.options(context)
 
         if option.find:
             if option.regex:
@@ -359,12 +359,12 @@ class get:
             return icons[type]
 
 
-    class name_panel:
+    class name_stack:
 
 
         def options(context):
 
-            location = context.window_manager.name_panel.panel
+            location = context.window_manager.name_stack.panel
 
             if not 'options' in location:
                 location.add().name = 'options'
@@ -393,7 +393,7 @@ class get:
 
             def __new__(self, context):
 
-                option = get.name_panel.options(context).filters['options']
+                option = get.name_stack.options(context).filters['options']
 
                 if option.display_mode == 'ACTIVE':
                     if context.active_object:
@@ -442,14 +442,14 @@ class get:
                             'active': regex.panel_search(context, object.name),
                             'types': []}
 
-                        for type in get.name_panel.name_stack.types:
+                        for type in get.name_stack.name_stack.types:
                             if type != 'object_data':
                                 if getattr(option, type):
                                     if getattr(self, type)(context, object):
                                         stack['objects'][object.name]['types'].append(type)
 
                                         stack['objects'][object.name][type] = {
-                                            'datablocks': getattr(get.name_panel.name_stack, type)(context, object)}
+                                            'datablocks': getattr(get.name_stack.name_stack, type)(context, object)}
 
                                         for datablock in stack['objects'][object.name][type]['datablocks']:
                                             if datablock:
@@ -527,8 +527,8 @@ class get:
                 bones = []
 
                 if object == context.active_object and object.type == 'ARMATURE':
-                    option = get.name_panel.options(context).filters['options']
-                    display_mode = get.name_panel.options(context).filters['options'].display_mode
+                    option = get.name_stack.options(context).filters['options']
+                    display_mode = get.name_stack.options(context).filters['options'].display_mode
 
                     if context.mode == 'POSE':
                         if option.display_mode == 'ACTIVE':
@@ -851,7 +851,7 @@ class get:
 
         def options(context):
 
-            location = context.window_manager.name_panel.namer
+            location = context.window_manager.name_stack.namer
 
             if not 'options' in location:
                 location.add().name = 'options'
@@ -1058,7 +1058,7 @@ class update:
 
     def selection(operator, context, event):
 
-        option = get.name_panel.options(context).filters['options']
+        option = get.name_stack.options(context).filters['options']
 
         objects = context.scene.objects
 
@@ -1127,7 +1127,7 @@ class update:
 
     def filter_options(operator, context):
 
-        option = get.name_panel.options(context).filters['options']
+        option = get.name_stack.options(context).filters['options']
 
         toggles = [
             'groups',

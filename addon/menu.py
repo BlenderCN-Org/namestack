@@ -6,14 +6,14 @@ from . import interface
 from .utilities import get
 
 
-class name_panel_specials(Menu):
-    bl_idname = 'view3d.name_panel_specials'
+class name_stack_specials(Menu):
+    bl_idname = 'view3d.name_stack_specials'
     bl_label = 'Specials'
     bl_description = 'Tools and Options'
 
 
     def draw(self, context):
-        interface.name_panel.specials(self, context)
+        interface.name_stack.specials(self, context)
 
 
 class namer_search_specials(Menu):

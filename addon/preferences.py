@@ -383,7 +383,7 @@ class datablock_settings(PropertyGroup):
         type = physics_context)
 
 
-class name_panel(AddonPreferences):
+class name_stack(AddonPreferences):
     bl_idname = __name__.partition('.')[0]
 
     default = defaults['preferences']
@@ -496,4 +496,4 @@ class name_panel(AddonPreferences):
 
     def draw(self, context):
 
-        interface.name_panel.preferences(self, context)
+        interface.name_stack.preferences(self, context)

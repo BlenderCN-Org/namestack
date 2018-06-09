@@ -10,33 +10,33 @@ from .config import defaults
 
 
 class clear_find(Operator):
-    bl_idname = 'view3d.name_panel_clear_find'
+    bl_idname = 'view3d.name_stack_clear_find'
     bl_label = 'Clear Find'
     bl_description = 'Clear the find field'
 
 
     def execute(self, context):
 
-        get.name_panel.options(context).find = ''
+        get.name_stack.options(context).find = ''
 
         return {'FINISHED'}
 
 
 class clear_replace(Operator):
-    bl_idname = 'view3d.name_panel_clear_replace'
+    bl_idname = 'view3d.name_stack_clear_replace'
     bl_label = 'Clear Replace'
     bl_description = 'Clear the replace field'
 
 
     def execute(self, context):
 
-        get.name_panel.options(context).replace = ''
+        get.name_stack.options(context).replace = ''
 
         return {'FINISHED'}
 
 
 class options(Operator):
-    bl_idname = 'view3d.name_panel_options'
+    bl_idname = 'view3d.name_stack_options'
     bl_label = 'Display Options'
     bl_description = 'Adjust display options for the name stack'
 
@@ -46,7 +46,7 @@ class options(Operator):
 
 
     def draw(self, context):
-        interface.name_panel.options(self, context)
+        interface.name_stack.options(self, context)
 
 
     def invoke(self, context, event):
@@ -284,7 +284,7 @@ class operation_move(Operator):
 
 
 class update_info(Operator):
-    bl_idname = 'wm.name_panel_update_info'
+    bl_idname = 'wm.name_stack_update_info'
     bl_label = 'Update info'
     bl_description = 'Get Latest update information'
     bl_options = {'INTERNAL'}
@@ -313,7 +313,7 @@ class update_info(Operator):
 
             row = column.row()
             row.scale_y = 1.5
-            row.operator('wm.name_panel_update_addon', text='Update')
+            row.operator('wm.name_stack_update_addon', text='Update')
 
         elif not update.check.connection():
 
@@ -337,7 +337,7 @@ class update_info(Operator):
 
 
 class update_confirm(Operator):
-    bl_idname = 'wm.name_panel_update_confirm'
+    bl_idname = 'wm.name_stack_update_confirm'
     bl_label = ''
     bl_description = ''
     bl_options = {'INTERNAL'}
