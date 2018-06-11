@@ -911,34 +911,40 @@ class get:
                 for panel in default_panels:
                     collection = getattr(location['options'], panel[0].lower())
                     id = panel[1]
+                    id_org = panel[1]
 
                     try:
-                        # handle panel exceptions for backwards compatability
-
                         type = getattr(bpy.types, id)
+                    except:
+                        try:
+                            id_split = id.split('_PT_')
+                            id_split[0] = ''.join(id_split[0].title().split('_'))
+                            id = id_split[0] + '_PT_' + id_split[1]
+                            type = getattr(bpy.types, id)
+                        except Exception as e:
+                            print(panel[1], 'failed because', e)
+                            continue
 
-                        hidden_header = False
-                        if hasattr(type, 'bl_options'):
-                            if 'HIDE_HEADER' in getattr(type, 'bl_options'):
-                                hidden_header = True
+                    hidden_header = False
+                    if hasattr(type, 'bl_options'):
+                        if 'HIDE_HEADER' in getattr(type, 'bl_options'):
+                            hidden_header = True
 
-                        name = id
-                        name = ' '.join(name.title().split('_'))
-                        name_split = name.split('Pt ')
-                        if name_split[0][:6] == 'Cycles':
-                            name = 'Cycles ' + name_split[1]
-                        else:
-                            name = name_split[1]
-                        print(name)
-                        collection.add().name = name
-                        collection[name].id = id
-                        collection[name].label = type.bl_label
-                        if hidden_header:
-                            collection[name].hide_header = hidden_header
-                            collection[name].collapsed = not hidden_header
+                    name = id
+                    name = ' '.join(name.title().split('_'))
+                    name_split = name.split('Pt ')
+                    if name_split[0][:6] == 'Cycles':
+                        name = 'Cycles ' + name_split[1]
+                    else:
+                        name = name_split[1]
+                    collection.add().name = name
+                    collection[name].id = id
+                    collection[name].id_org = id_org
+                    collection[name].label = type.bl_label
+                    if hidden_header:
+                        collection[name].hide_header = hidden_header
+                        collection[name].collapsed = not hidden_header
 
-                    except Exception as e:
-                        print(panel[1], 'unavailable because:', e)
 
             return location['options']
 

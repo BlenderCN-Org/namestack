@@ -393,13 +393,7 @@ class datablock:
             'OBJECT_PT_context_object',
             'OBJECT_PT_motion_paths',
             'OBJECT_PT_constraints',
-            'DATA_PT_context_mesh',
-            'DATA_PT_normals',
-            'DATA_PT_texture_space',
-            'DATA_PT_uv_texture',
-            'DATA_PT_vertex_colors',
-            'DATA_PT_customdata',
-
+            'DATA_PT_modifiers',
             'DATA_PT_context_curve',
             'DATA_PT_shape_curve',
             'DATA_PT_curve_texture_space',
@@ -409,8 +403,16 @@ class datablock:
             'DATA_PT_font',
             'DATA_PT_paragraph',
             'DATA_PT_text_boxes',
-
-            'DATA_PT_modifiers',
+            'DATA_PT_context_metaball',
+            'DATA_PT_metaball',
+            'DATA_PT_mball_texture_space',
+            'DATA_PT_metaball_element',
+            'DATA_PT_context_mesh',
+            'DATA_PT_normals',
+            'DATA_PT_texture_space',
+            'DATA_PT_uv_texture',
+            'DATA_PT_vertex_colors',
+            'DATA_PT_customdata',
         ]
 
         self.header_overrides = [
@@ -445,12 +447,6 @@ class datablock:
             'CYCLES_WORLD_PT_mist',
             'CYCLES_WORLD_PT_ray_visibility',
             'CYCLES_WORLD_PT_settings',
-            'DATA_PT_context_mesh',
-            'DATA_PT_normals',
-            'DATA_PT_texture_space',
-            'DATA_PT_uv_texture',
-            'DATA_PT_vertex_colors',
-            'DATA_PT_customdata',
             'DATA_PT_context_curve',
             'DATA_PT_shape_curve',
             'DATA_PT_curve_texture_space',
@@ -460,7 +456,16 @@ class datablock:
             'DATA_PT_font',
             'DATA_PT_paragraph',
             'DATA_PT_text_boxes',
-
+            'DATA_PT_context_metaball',
+            'DATA_PT_metaball',
+            'DATA_PT_mball_texture_space',
+            'DATA_PT_metaball_element',
+            'DATA_PT_context_mesh',
+            'DATA_PT_normals',
+            'DATA_PT_texture_space',
+            'DATA_PT_uv_texture',
+            'DATA_PT_vertex_colors',
+            'DATA_PT_customdata',
         ]
 
         self.operator = operator
@@ -672,7 +677,7 @@ class datablock:
 
 
     def poll_check(self, context, panel, type):
-        if panel.id in self.poll_overrides:
+        if panel.id_org in self.poll_overrides:
             name = 'CYCLES' + panel.id[7:] if panel.id[:7] == 'CYCLES_' else panel.id
             split = name.split('_')
             name = '_'.join(split[2:])
@@ -922,7 +927,7 @@ class datablock:
                 row.prop(lineset, 'group_negation', expand=True)
 
 
-    def renderlayer_draw_color_modifier(self, context, modifier):
+    def draw_color_modifier(self, context, modifier):
         layout = self.layout
 
         column = layout.column(align=True)
@@ -988,7 +993,7 @@ class datablock:
                     self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
-    def renderlayer_draw_alpha_modifier(self, context, modifier):
+    def draw_alpha_modifier(self, context, modifier):
         layout = self.layout
 
         column = layout.column(align=True)
@@ -1044,7 +1049,7 @@ class datablock:
                     self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
-    def renderlayer_draw_thickness_modifier(self, context, modifier):
+    def draw_thickness_modifier(self, context, modifier):
         layout = self.layout
 
         column = layout.column(align=True)
@@ -1117,7 +1122,7 @@ class datablock:
                     self.draw_modifier_box_error(self, column.box(), modifier, message)
 
 
-    def renderlayer_draw_geometry_modifier(self, context, modifier):
+    def draw_geometry_modifier(self, context, modifier):
         layout = self.layout
 
         column = layout.column(align=True)
@@ -1219,7 +1224,7 @@ class datablock:
 
     # scene
     @staticmethod
-    def scene_draw_keyframing_settings(context, layout, ks, ksp):
+    def draw_keyframing_settings(context, layout, ks, ksp):
         datablock._draw_keyframing_setting(
                 context, layout, ks, ksp, 'Needed',
                 'use_insertkey_override_needed', 'use_insertkey_needed',
@@ -1567,97 +1572,6 @@ class datablock:
                 getattr(self, modifier.type)(self, box, object, modifier)
 
 
-    def data_draw_context_mesh(self, context):
-        layout = self.layout
-
-        ob = context.object
-        layout.template_ID(ob, 'data')
-
-
-    def data_draw_normals(self, context):
-        layout = self.layout
-
-        mesh = context.object.data
-
-        split = layout.split()
-
-        col = split.column()
-        col.prop(mesh, 'use_auto_smooth')
-        sub = col.column()
-        sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
-        sub.prop(mesh, 'auto_smooth_angle', text='Angle')
-
-        split.prop(mesh, 'show_double_sided')
-
-
-    def data_draw_texture_space(self, context):
-        layout = self.layout
-
-        mesh = context.object.data
-
-        layout.prop(mesh, 'texture_mesh')
-
-        layout.separator()
-
-        layout.prop(mesh, 'use_auto_texspace')
-        row = layout.row()
-        row.column().prop(mesh, 'texspace_location', text='Location')
-        row.column().prop(mesh, 'texspace_size', text='Size')
-
-
-    def data_draw_uv_texture(self, context):
-        layout = self.layout
-
-        me = context.object.data
-
-        row = layout.row()
-        col = row.column()
-
-        col.template_list('MESH_UL_uvmaps_vcols', 'uvmaps', me, 'uv_textures', me.uv_textures, 'active_index', rows=1)
-
-        col = row.column(align=True)
-        col.operator('mesh.uv_texture_add', icon='ZOOMIN', text='')
-        col.operator('mesh.uv_texture_remove', icon='ZOOMOUT', text='')
-
-
-    def data_draw_vertex_colors(self, context):
-        layout = self.layout
-
-        me = context.object.data
-
-        row = layout.row()
-        col = row.column()
-
-        col.template_list('MESH_UL_uvmaps_vcols', 'vcols', me, 'vertex_colors', me.vertex_colors, 'active_index', rows=1)
-
-        col = row.column(align=True)
-        col.operator('mesh.vertex_color_add', icon='ZOOMIN', text='')
-        col.operator('mesh.vertex_color_remove', icon='ZOOMOUT', text='')
-
-
-    def data_draw_customdata(self, context):
-        layout = self.layout
-
-        obj = context.object
-        me = obj.data
-        col = layout.column()
-
-        col.operator('mesh.customdata_mask_clear', icon='X')
-        col.operator('mesh.customdata_skin_clear', icon='X')
-
-        if me.has_custom_normals:
-            col.operator('mesh.customdata_custom_splitnormals_clear', icon='X')
-        else:
-            col.operator('mesh.customdata_custom_splitnormals_add', icon='ZOOMIN')
-
-        col = layout.column()
-
-        col.enabled = (obj.mode != 'EDIT')
-        col.prop(me, 'use_customdata_vertex_bevel')
-        col.prop(me, 'use_customdata_edge_bevel')
-        col.prop(me, 'use_customdata_edge_crease')
-
-
     def data_draw_context_curve(self, context):
         layout = self.layout
 
@@ -1716,6 +1630,68 @@ class datablock:
             subsub.prop(curve, 'use_stretch')
             sub.prop(curve, 'use_deform_bounds')
 
+
+    def data_draw_curve_texture_space(self, context):
+        layout = self.layout
+
+        curve = context.object.data
+
+        row = layout.row()
+        row.prop(curve, 'use_auto_texspace')
+        row.prop(curve, 'use_uv_as_generated')
+
+        row = layout.row()
+        row.column().prop(curve, 'texspace_location', text='Location')
+        row.column().prop(curve, 'texspace_size', text='Size')
+
+        layout.operator('curve.match_texture_space')
+
+
+    def data_draw_geometry_curve(self, context):
+        layout = self.layout
+
+        curve = context.object.data
+
+        split = layout.split()
+
+        col = split.column()
+        col.label(text='Modification:')
+        col.prop(curve, 'offset')
+        col.prop(curve, 'extrude')
+        col.label(text='Taper Object:')
+        col.prop(curve, 'taper_object', text='')
+
+        col = split.column()
+        col.label(text='Bevel:')
+        col.prop(curve, 'bevel_depth', text='Depth')
+        col.prop(curve, 'bevel_resolution', text='Resolution')
+        col.label(text='Bevel Object:')
+        col.prop(curve, 'bevel_object', text='')
+
+        if type(curve) is not TextCurve:
+            col = layout.column(align=True)
+            row = col.row()
+            row.label(text='Bevel Factor:')
+
+            col = layout.column()
+            col.active = (
+                    (curve.bevel_depth > 0.0) or
+                    (curve.extrude > 0.0) or
+                    (curve.bevel_object is not None))
+            row = col.row(align=True)
+            row.prop(curve, 'bevel_factor_mapping_start', text='')
+            row.prop(curve, 'bevel_factor_start', text='Start')
+            row = col.row(align=True)
+            row.prop(curve, 'bevel_factor_mapping_end', text='')
+            row.prop(curve, 'bevel_factor_end', text='End')
+
+            row = layout.row()
+            sub = row.row()
+            sub.active = curve.taper_object is not None
+            sub.prop(curve, 'use_map_taper')
+            sub = row.row()
+            sub.active = curve.bevel_object is not None
+            sub.prop(curve, 'use_fill_caps')
 
     def data_draw_pathanim(self, context):
         layout = self.layout
@@ -1915,6 +1891,170 @@ class datablock:
             row.operator('font.textbox_remove', text='', icon='X', emboss=False).index = i
 
 
+    def data_draw_context_metaball(self, context):
+        layout = self.layout
+
+        ob = context.object
+        layout.template_ID(ob, 'data')
+
+
+    def data_draw_metaball(self, context):
+        layout = self.layout
+
+        mball = context.object.data
+
+        split = layout.split()
+
+        col = split.column()
+        col.label(text='Resolution:')
+        sub = col.column(align=True)
+        sub.prop(mball, 'resolution', text='View')
+        sub.prop(mball, 'render_resolution', text='Render')
+
+        col = split.column()
+        col.label(text='Settings:')
+        col.prop(mball, 'threshold', text='Threshold')
+
+        layout.label(text='Update:')
+        layout.row().prop(mball, 'update_method', expand=True)
+
+
+    def data_draw_mball_texture_space(self, context):
+        layout = self.layout
+
+        mball = context.object.data
+
+        layout.prop(mball, 'use_auto_texspace')
+
+        row = layout.row()
+        row.column().prop(mball, 'texspace_location', text='Location')
+        row.column().prop(mball, 'texspace_size', text='Size')
+
+
+    def data_draw_metaball_element(self, context):
+        layout = self.layout
+
+        metaelem = context.object.data.elements.active
+
+        layout.prop(metaelem, 'type')
+
+        split = layout.split()
+
+        col = split.column(align=True)
+        col.label(text='Settings:')
+        col.prop(metaelem, 'stiffness', text='Stiffness')
+        col.prop(metaelem, 'use_negative', text='Negative')
+        col.prop(metaelem, 'hide', text='Hide')
+
+        col = split.column(align=True)
+
+        if metaelem.type in {'CUBE', 'ELLIPSOID'}:
+            col.label(text='Size:')
+            col.prop(metaelem, 'size_x', text='X')
+            col.prop(metaelem, 'size_y', text='Y')
+            col.prop(metaelem, 'size_z', text='Z')
+
+        elif metaelem.type == 'TUBE':
+            col.label(text='Size:')
+            col.prop(metaelem, 'size_x', text='X')
+
+        elif metaelem.type == 'PLANE':
+            col.label(text='Size:')
+            col.prop(metaelem, 'size_x', text='X')
+            col.prop(metaelem, 'size_y', text='Y')
+
+
+    def data_draw_context_mesh(self, context):
+        layout = self.layout
+
+        ob = context.object
+        layout.template_ID(ob, 'data')
+
+
+    def data_draw_normals(self, context):
+        layout = self.layout
+
+        mesh = context.object.data
+
+        split = layout.split()
+
+        col = split.column()
+        col.prop(mesh, 'use_auto_smooth')
+        sub = col.column()
+        sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
+        sub.prop(mesh, 'auto_smooth_angle', text='Angle')
+
+        split.prop(mesh, 'show_double_sided')
+
+
+    def data_draw_texture_space(self, context):
+        layout = self.layout
+
+        mesh = context.object.data
+
+        layout.prop(mesh, 'texture_mesh')
+
+        layout.separator()
+
+        layout.prop(mesh, 'use_auto_texspace')
+        row = layout.row()
+        row.column().prop(mesh, 'texspace_location', text='Location')
+        row.column().prop(mesh, 'texspace_size', text='Size')
+
+
+    def data_draw_uv_texture(self, context):
+        layout = self.layout
+
+        me = context.object.data
+
+        row = layout.row()
+        col = row.column()
+
+        col.template_list('MESH_UL_uvmaps_vcols', 'uvmaps', me, 'uv_textures', me.uv_textures, 'active_index', rows=1)
+
+        col = row.column(align=True)
+        col.operator('mesh.uv_texture_add', icon='ZOOMIN', text='')
+        col.operator('mesh.uv_texture_remove', icon='ZOOMOUT', text='')
+
+
+    def data_draw_vertex_colors(self, context):
+        layout = self.layout
+
+        me = context.object.data
+
+        row = layout.row()
+        col = row.column()
+
+        col.template_list('MESH_UL_uvmaps_vcols', 'vcols', me, 'vertex_colors', me.vertex_colors, 'active_index', rows=1)
+
+        col = row.column(align=True)
+        col.operator('mesh.vertex_color_add', icon='ZOOMIN', text='')
+        col.operator('mesh.vertex_color_remove', icon='ZOOMOUT', text='')
+
+
+    def data_draw_customdata(self, context):
+        layout = self.layout
+
+        obj = context.object
+        me = obj.data
+        col = layout.column()
+
+        col.operator('mesh.customdata_mask_clear', icon='X')
+        col.operator('mesh.customdata_skin_clear', icon='X')
+
+        if me.has_custom_normals:
+            col.operator('mesh.customdata_custom_splitnormals_clear', icon='X')
+        else:
+            col.operator('mesh.customdata_custom_splitnormals_add', icon='ZOOMIN')
+
+        col = layout.column()
+
+        col.enabled = (obj.mode != 'EDIT')
+        col.prop(me, 'use_customdata_vertex_bevel')
+        col.prop(me, 'use_customdata_edge_bevel')
+        col.prop(me, 'use_customdata_edge_crease')
+
+
     ## poll ##
     # world
     @staticmethod
@@ -2002,31 +2142,6 @@ class datablock:
     @staticmethod
     def cyclesworld_poll_settings(context):
         return context.scene.world
-
-    @staticmethod
-    def data_poll_context_mesh(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-
-    @staticmethod
-    def data_poll_normals(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-    
-    @staticmethod
-    def data_poll_texture_space(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-
-    @staticmethod
-    def data_poll_uv_texture(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-
-    @staticmethod
-    def data_poll_vertex_colors(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-
-    @staticmethod
-    def data_poll_customdata(context):
-        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
-
     @staticmethod
     def data_poll_context_curve(context):
         return context.active_object.type in {'CURVE', 'SURFACE', 'FONT'} and context.active_object.data
@@ -2036,24 +2151,72 @@ class datablock:
         return context.active_object.type in {'CURVE', 'SURFACE', 'FONT'} and context.active_object.data
 
     @staticmethod
-    def data_poll_pathanim(context):
-        return context.active_object and context.active_object.type == 'CURVE' and context.active_object.data
+    def data_poll_curve_texture_space(context):
+        return context.active_object.type in {'CURVE', 'SURFACE', 'FONT'} and context.active_object.data
 
     @staticmethod
-    def data_poll_active_spline(self, context):
-        return context.active_object.type != 'FONT' and context.active_object.data and context.active_object.data.splines.active
+    def data_poll_geometry_curve(context):
+        return context.active_object.type in {'CURVE', 'FONT'} and context.active_object.data
+
+    @staticmethod
+    def data_poll_pathanim(context):
+        return context.active_object.type == 'CURVE' and context.active_object.data
+
+    @staticmethod
+    def data_poll_active_spline(context):
+        return context.active_object.type in {'CURVE', 'SURFACE'} and context.active_object.data and context.active_object.data.splines.active
 
     @staticmethod
     def data_poll_font(context):
-        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+        return context.active_object.type == 'FONT' and context.active_object.data
 
     @staticmethod
     def data_poll_paragraph(context):
-        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+        return context.active_object.type == 'FONT' and context.active_object.data
 
     @staticmethod
     def data_poll_text_boxes(context):
-        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+        return context.active_object.type == 'FONT' and context.active_object.data
+
+    @staticmethod
+    def data_poll_context_metaball(context):
+        return context.active_object.type == 'META' and context.active_object.data
+
+    @staticmethod
+    def data_poll_metaball(context):
+        return context.active_object.type == 'META' and context.active_object.data
+
+    @staticmethod
+    def data_poll_mball_texture_space(context):
+        return context.active_object.type == 'META' and context.active_object.data
+
+    @staticmethod
+    def data_poll_metaball_element(context):
+        return context.active_object.type == 'META' and context.active_object.data and context.active_object.data.elements.active
+
+    @staticmethod
+    def data_poll_context_mesh(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_normals(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
+    
+    @staticmethod
+    def data_poll_texture_space(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_uv_texture(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_vertex_colors(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_customdata(context):
+        return context.active_object.type == 'MESH' and context.active_object.data
 
 
     ###################

@@ -11,6 +11,7 @@ from .utilities import get, update
 
 class panel_options(PropertyGroup):
     id = StringProperty()
+    id_org = StringProperty()
 
     label = StringProperty(
         name = 'Label',
