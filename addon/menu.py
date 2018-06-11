@@ -6,47 +6,47 @@ from . import interface
 from .utilities import get
 
 
-class name_stack_specials(Menu):
-    bl_idname = 'view3d.name_stack_specials'
+class specials(Menu):
+    bl_idname = 'namestack.specials'
     bl_label = 'Specials'
     bl_description = 'Tools and Options'
 
 
     def draw(self, context):
-        interface.name_stack.specials(self, context)
+        interface.namestack.specials(self, context)
 
 
-class namer_search_specials(Menu):
-    bl_idname = 'WM_MT_namer_search_specials'
+class search_specials(Menu):
+    bl_idname = 'namestack.batchname_search_specials'
     bl_label = 'Search Options'
 
 
     def draw(self, context):
-        interface.namer.search_specials(self, context)
+        interface.batchname.search_specials(self, context)
 
 
 class move_search_specials(Menu):
-    bl_idname = 'WM_MT_namer_move_search_specials'
+    bl_idname = 'namestack.batchname_move_search_specials'
     bl_label = 'Search Options'
 
 
     def draw(self, context):
-        interface.namer.move_search_specials(self, context)
+        interface.batchname.move_search_specials(self, context)
 
 
 class swap_search_specials(Menu):
-    bl_idname = 'WM_MT_namer_swap_search_specials'
+    bl_idname = 'namestack.batchname_swap_search_specials'
     bl_label = 'Search Options'
 
 
     def draw(self, context):
-        interface.namer.swap_search_specials(self, context)
+        interface.batchname.swap_search_specials(self, context)
 
 
 class operation_specials(Menu):
-    bl_idname = 'WM_MT_namer_operation_specials'
+    bl_idname = 'namestack.batchname_operation_specials'
     bl_label = 'Name Operation Specials'
 
 
     def draw(self, context):
-        interface.namer.operation_specials(self, context)
+        interface.batchname.operation_specials(self, context)

@@ -2,27 +2,30 @@ import bpy
 import bl_ui
 import rna_keymap_ui
 
-from .utilities import get
+from bpy.types import Curve, SurfaceCurve, TextCurve
+from cycles.ui import find_node, find_node_input, use_branched_path, use_sample_all_lights, use_cpu
+
+from .utilities import get, update
 from .config import remote
 
 
-class name_stack:
+class namestack:
 
 
-    def __init__(self, panel, context):
-        self.layout = panel.layout
+    def __init__(self, stack, context):
+        self.layout = stack.layout
 
-        if get.preferences(context).update_display_panel and get.preferences(context).update_ready:
+        if get.preferences(context).update_display_stack and get.preferences(context).update_ready:
             row = self.layout.row()
             row.alignment = 'CENTER'
             row.scale_y = 2
-            row.operator('wm.name_stack_update_info', text='Update Available!', icon='ERROR', emboss=False)
+            row.operator('namestack.update_info', text='Update Available!', icon='ERROR', emboss=False)
 
 
-        self.option = get.name_stack.options(context)
+        self.option = get.namestack.options(context)
         self.find_and_replace(context)
         self.layout.separator()
-        self.name_stack(context)
+        self.stack(context)
 
 
     def find_and_replace(self, context):
@@ -31,26 +34,26 @@ class name_stack:
         row.prop(self.option, 'find', text='', icon='VIEWZOOM')
 
         if self.option.find:
-            row.operator('view3d.name_stack_clear_find', text='', icon='X')
+            row.operator('namestack.clear_find', text='', icon='X')
 
-        row.operator('view3d.name_stack_options', text='', icon='FILTER')
-        row.menu('view3d.name_stack_specials', text='', icon='COLLAPSEMENU')
+        row.operator('namestack.options', text='', icon='FILTER')
+        row.menu('namestack.specials', text='', icon='COLLAPSEMENU')
 
         if self.option.find:
             row = column.row(align=True)
             row.prop(self.option, 'replace', text='', icon='FILE_REFRESH')
 
             if self.option.replace:
-                row.operator('view3d.name_stack_clear_replace', text='', icon='X')
+                row.operator('namestack.clear_replace', text='', icon='X')
 
             sub = row.row(align=True)
             sub.scale_x = 0.2
 
-            sub.operator('view3d.name_stack_options', text='OK')
+            sub.operator('namestack.options', text='OK')
 
 
-    def name_stack(self, context):
-        self.stack = get.name_stack.name_stack(context)
+    def stack(self, context):
+        self.stack = get.namestack.stack(context)
 
         # TODO: add display limit
         if self.stack:
@@ -61,7 +64,7 @@ class name_stack:
 
 
     def no_stack(self):
-        option = self.option.filters['options']
+        option = self.option.filter_options['options']
 
         row = self.layout.row()
         row.alignment = 'CENTER'
@@ -81,9 +84,9 @@ class name_stack:
         self.layout.separator()
 
 
-    def specials(panel, context):
-        option = get.name_stack.options(context)
-        layout = panel.layout
+    def specials(stack, context):
+        option = get.namestack.options(context)
+        layout = stack.layout
 
         layout.label(text='Find & Replace')
 
@@ -98,35 +101,35 @@ class name_stack:
 
         layout.separator()
 
-        layout.operator('wm.namer', text='Transfer Names')
-        layout.operator('wm.namer', text='Count Names')
+        layout.operator('namestack.batchname', text='Transfer Names')
+        layout.operator('namestack.batchname', text='Count Names')
 
         layout.separator()
 
-        layout.operator('wm.namer', text='Namer', icon='SORTALPHA')
+        layout.operator('namestack.batchname', icon='SORTALPHA')
 
         if get.preferences(context).update_display_menu and get.preferences(context).update_ready:
             layout.separator()
 
-            layout.operator('wm.name_stack_update_info', text='Update Available!', icon='ERROR')
+            layout.operator('namestack.info_update', text='Update Available!', icon='ERROR')
 
 
     class stack_object:
 
 
-        def __init__(self, panel, context, object):
-            self.option = get.name_stack.options(context).filters['options']
+        def __init__(self, stack, context, object):
+            self.option = get.namestack.options(context).filter_options['options']
             self.context = context
             self.object = object
 
-            column = panel.layout.column(align=True)
+            column = stack.layout.column(align=True)
 
-            self.row(panel.stack['objects'], column, self.object, get.icon.object(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
+            self.row(stack.stack['objects'], column, self.object, get.icon.object(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
 
-            for type in panel.stack['objects'][object.name]['types']:
-                getattr(self, type)(panel.stack['objects'][object.name][type], column)
+            for type in stack.stack['objects'][object.name]['types']:
+                getattr(self, type)(stack.stack['objects'][object.name][type], column)
             for _ in range(get.preferences(self.context).separators):
-                panel.layout.separator()
+                stack.layout.separator()
 
 
         def row(self, location, column, datablock, icon, name_type='name', emboss=False, active=True):
@@ -139,7 +142,7 @@ class name_stack:
                 sub.scale_x = 1.5 if not emboss else 1.6
                 sub.active = active
 
-                operator = sub.operator('wm.datablock_settings', text='', icon=icon, emboss=emboss)
+                operator = sub.operator('namestack.datablock', text='', icon=icon, emboss=emboss)
                 operator.click_through = get.preferences(self.context).click_through
                 operator.context_override = ''
                 operator.object_name = self.object.name
@@ -245,7 +248,7 @@ class name_stack:
 
         def __init__(self, operator, context):
 
-            self.option = get.name_stack.options(context).filters['options']
+            self.option = get.namestack.options(context).filter_options['options']
 
             split = operator.layout.column().split(percentage=0.15)
             column = split.column()
@@ -321,115 +324,7 @@ class name_stack:
             row.prop(get.preferences(context), 'location', expand=True)
 
             row = self.split.row()
-            row.prop(get.preferences(context), 'popup_width', text='Pop-up Width')
-
-
-    class preferences:
-
-
-        def __init__(self, addon, context):
-            addon.preference = get.preferences(context)
-
-            row = addon.layout.row()
-            row.scale_y = 2
-            row.prop(addon.preference, 'mode', expand=True)
-
-            getattr(self, addon.preference.mode.lower())(addon, context)
-
-            addon.layout.separator()
-
-            row = addon.layout.row(align=True)
-            row.scale_y = 1.5
-            row.operator('wm.url_open', text='Report a bug').url = remote['bug_report']
-            row.operator('wm.url_open', text='Thread').url = remote['thread']
-            row.operator('wm.url_open', text='proxeIO').url = remote['proxeIO']
-            row.operator('wm.url_open', text='Patreon').url = remote['patreon']
-            row.operator('wm.url_open', text='Donate').url = remote['donate']
-
-
-        def general(self, addon, context):
-
-            box = addon.layout.box()
-
-            row = box.row()
-            row.prop(addon.preference, 'keep_session_settings')
-
-
-        def panel(self, addon, context):
-
-            box = addon.layout.box()
-
-            row = box.row()
-            row.label(text='Location:')
-            row.prop(addon.preference, 'location', expand=True)
-
-            row = box.row()
-            row.prop(addon.preference, 'pin_active')
-
-            row = box.row()
-            row.prop(addon.preference, 'remove_item_panel')
-            row.prop(addon.preference, 'click_through')
-
-            row = box.row()
-            row.label(text='Pop-up Width:')
-            row.prop(addon.preference, 'popup_width', text='')
-
-            row = box.row()
-            row.label(text='Separators:')
-            row.prop(addon.preference, 'separators', text='')
-
-
-        def datablock(self, addon, context):
-
-            box = addon.layout.box()
-
-            row = box.row()
-            row.label(text='Pop-up Width:')
-            row.prop(addon.preference, 'datablock_popup_width', text='')
-
-
-        def namer(self, addon, context):
-
-            box = addon.layout.box()
-
-            row = box.row()
-            row.prop(addon.preference, 'use_last')
-            row.prop(addon.preference, 'auto_name_operations')
-
-            row = box.row()
-            row.label(text='Pop-up Width:')
-            row.prop(addon.preference, 'namer_popup_width')
-
-
-        def hotkey(self, addon, context):
-
-            layout = addon.layout
-            column = layout.column()
-
-            keyconfig = context.window_manager.keyconfigs.addon
-            keymap = keyconfig.keymaps['Window']
-
-            if 'wm.datablock_settings' in keymap.keymap_items:
-                keymapitem = keymap.keymap_items['wm.datablock_settings']
-                column.context_pointer_set("keymap", keymap)
-                rna_keymap_ui.draw_kmi([], keyconfig, keymap, keymapitem, column, 0)
-
-            if 'wm.namer' in keymap.keymap_items:
-                keymapitem = keymap.keymap_items['wm.namer']
-                column.context_pointer_set("keymap", keymap)
-                rna_keymap_ui.draw_kmi([], keyconfig, keymap, keymapitem, column, 0)
-
-
-        def updates(self, addon, context):
-
-            box = addon.layout.box()
-
-            row = box.row()
-            row.prop(addon, 'update_check')
-
-            row = box.row()
-            row.prop(addon, 'update_display_menu')
-            row.prop(addon, 'update_display_panel')
+            row.prop(get.preferences(context), 'filter_popup_width', text='Pop-up Width')
 
 
 class datablock:
@@ -467,29 +362,71 @@ class datablock:
     # target particle system
     # target particle settings
 
-    # TODO: pin id, name panel needs to override but not replace pin state if it is called from name stack
+    # TODO: pin id, name stack needs to override but not replace pin state if it is called from name stack
         # this should work with the individual states too such as modifier, if a modifier is pinned after being called from name stack, unless the operator is called again from the stack only show the last pin state, otherwise show the new datablock target and maintain the old pin state
         #XXX: add pin history navigation
     # TODO: Create a properties pop-up that behaves the same as the properties window place it on the search row, right after filters
 
 
     def __init__(self, operator, context):
-
         self.draw_overrides = [
             'RENDERLAYER_PT_freestyle_lineset',
+            'WORLD_PT_game_context_world',
+            'WORLD_PT_game_world',
+            'WORLD_PT_game_environment_lighting',
+            'WORLD_PT_game_mist',
             'WORLD_PT_context_world',
             'WORLD_PT_preview',
             'WORLD_PT_world',
             'WORLD_PT_ambient_occlusion',
-            'DATA_PT_modifiers']
-
-        self.header_overrides = [
-            'WORLD_PT_ambient_occlusion',
             'WORLD_PT_environment_lighting',
             'WORLD_PT_indirect_lighting',
-            'WORLD_PT_mist']
+            'WORLD_PT_gather',
+            'WORLD_PT_mist',
+            'CYCLES_WORLD_PT_preview',
+            'CYCLES_WORLD_PT_surface',
+            'CYCLES_WORLD_PT_volume',
+            'CYCLES_WORLD_PT_ambient_occlusion',
+            'CYCLES_WORLD_PT_mist',
+            'CYCLES_WORLD_PT_ray_visibility',
+            'CYCLES_WORLD_PT_settings',
+            'OBJECT_PT_context_object',
+            'OBJECT_PT_motion_paths',
+            'OBJECT_PT_constraints',
+            'DATA_PT_context_mesh',
+            'DATA_PT_normals',
+            'DATA_PT_texture_space',
+            'DATA_PT_uv_texture',
+            'DATA_PT_vertex_colors',
+            'DATA_PT_customdata',
+
+            'DATA_PT_context_curve',
+            'DATA_PT_shape_curve',
+            'DATA_PT_curve_texture_space',
+            'DATA_PT_geometry_curve',
+            'DATA_PT_pathanim',
+            'DATA_PT_active_spline',
+            'DATA_PT_font',
+            'DATA_PT_paragraph',
+            'DATA_PT_text_boxes',
+
+            'DATA_PT_modifiers',
+        ]
+
+        self.header_overrides = [
+            'WORLD_PT_game_environment_lighting',
+            'WORLD_PT_game_mist',
+            'WORLD_PT_ambient_occlusion',
+            'WORLD_PT_environment_lighting',
+            'WORLD_PT_environment_lighting',
+            'WORLD_PT_indirect_lighting',
+            'WORLD_PT_mist',
+            'CYCLES_WORLD_PT_ambient_occlusion',
+            'DATA_PT_pathanim',
+        ]
 
         self.poll_overrides = [
+            'WORLD_PT_game_context_world',
             'WORLD_PT_context_world',
             'WORLD_PT_preview',
             'WORLD_PT_world',
@@ -501,13 +438,30 @@ class datablock:
             'WORLD_PT_game_context_world',
             'WORLD_PT_game_environment_lighting',
             'WORLD_PT_game_mist',
-            'CyclesWorld_PT_preview',
-            'CyclesWorld_PT_surface',
-            'CyclesWorld_PT_volume',
-            'CyclesWorld_PT_ambient_occlusion',
-            'CyclesWorld_PT_mist',
-            'CyclesWorld_PT_ray_visibility',
-            'CyclesWorld_PT_settings']
+            'CYCLES_WORLD_PT_preview',
+            'CYCLES_WORLD_PT_surface',
+            'CYCLES_WORLD_PT_volume',
+            'CYCLES_WORLD_PT_ambient_occlusion',
+            'CYCLES_WORLD_PT_mist',
+            'CYCLES_WORLD_PT_ray_visibility',
+            'CYCLES_WORLD_PT_settings',
+            'DATA_PT_context_mesh',
+            'DATA_PT_normals',
+            'DATA_PT_texture_space',
+            'DATA_PT_uv_texture',
+            'DATA_PT_vertex_colors',
+            'DATA_PT_customdata',
+            'DATA_PT_context_curve',
+            'DATA_PT_shape_curve',
+            'DATA_PT_curve_texture_space',
+            'DATA_PT_geometry_curve',
+            'DATA_PT_pathanim',
+            'DATA_PT_active_spline',
+            'DATA_PT_font',
+            'DATA_PT_paragraph',
+            'DATA_PT_text_boxes',
+
+        ]
 
         self.operator = operator
 
@@ -517,7 +471,7 @@ class datablock:
 
         row = layout.row(align=True)
         row.prop(self.option, 'context', text='', expand=True)
-        row.menu('view3d.name_stack_specials', text='', icon='COLLAPSEMENU') # TODO: make datablock pop-up specials menu
+        # row.menu('namestack.datablock_specials', text='', icon='COLLAPSEMENU') # TODO: make datablock pop-up specials menu
 
         box_column = layout.column()
 
@@ -559,7 +513,37 @@ class datablock:
 
 
     def constraint(self, context):
-        pass
+        self.space_template = bpy.types.OBJECT_PT_constraints.space_template
+        self.target_template = bpy.types.OBJECT_PT_constraints.target_template
+        self.ik_template = bpy.types.OBJECT_PT_constraints.ik_template
+        self._getConstraintClip = bpy.types.OBJECT_PT_constraints._getConstraintClip
+
+        self.CAMERA_SOLVER = bpy.types.OBJECT_PT_constraints.CAMERA_SOLVER
+        self.FOLLOW_TRACK = bpy.types.OBJECT_PT_constraints.FOLLOW_TRACK
+        self.OBJECT_SOLVER = bpy.types.OBJECT_PT_constraints.OBJECT_SOLVER
+        self.COPY_LOCATION = bpy.types.OBJECT_PT_constraints.COPY_LOCATION
+        self.COPY_ROTATION = bpy.types.OBJECT_PT_constraints.COPY_ROTATION
+        self.COPY_SCALE = bpy.types.OBJECT_PT_constraints.COPY_SCALE
+        self.COPY_TRANSFORMS = bpy.types.OBJECT_PT_constraints.COPY_TRANSFORMS
+        self.LIMIT_DISTANCE = bpy.types.OBJECT_PT_constraints.LIMIT_DISTANCE
+        self.LIMIT_LOCATION = bpy.types.OBJECT_PT_constraints.LIMIT_LOCATION
+        self.LIMIT_ROTATION = bpy.types.OBJECT_PT_constraints.LIMIT_ROTATION
+        self.LIMIT_SCALE = bpy.types.OBJECT_PT_constraints.LIMIT_SCALE
+        self.MAINTAIN_VOLUME = bpy.types.OBJECT_PT_constraints.MAINTAIN_VOLUME
+        self.TRANSFORM = bpy.types.OBJECT_PT_constraints.TRANSFORM
+        self.TRANSFORM_CACHE = bpy.types.OBJECT_PT_constraints.TRANSFORM_CACHE
+        self.CLAMP_TO = bpy.types.OBJECT_PT_constraints.CLAMP_TO
+        self.DAMPED_TRACK = bpy.types.OBJECT_PT_constraints.DAMPED_TRACK
+        self.LOCKED_TRACK = bpy.types.OBJECT_PT_constraints.LOCKED_TRACK
+        self.STRETCH_TO = bpy.types.OBJECT_PT_constraints.STRETCH_TO
+        self.TRACK_TO = bpy.types.OBJECT_PT_constraints.TRACK_TO
+        self.ACTION = bpy.types.OBJECT_PT_constraints.ACTION
+        self.CHILD_OF = bpy.types.OBJECT_PT_constraints.CHILD_OF
+        self.FLOOR = bpy.types.OBJECT_PT_constraints.FLOOR
+        self.FOLLOW_PATH = bpy.types.OBJECT_PT_constraints.FOLLOW_PATH
+        self.PIVOT = bpy.types.OBJECT_PT_constraints.PIVOT
+        self.RIGID_BODY_JOINT = bpy.types.OBJECT_PT_constraints.RIGID_BODY_JOINT
+        self.SHRINKWRAP = bpy.types.OBJECT_PT_constraints.SHRINKWRAP
 
 
     def modifier(self, context):
@@ -621,13 +605,43 @@ class datablock:
     def data(self, context):
         pass
 
-
     def bone(self, context):
         pass
 
 
     def bone_constraint(self, context):
-        pass
+        self.space_template = bpy.types.BONE_PT_constraints.space_template
+        self.target_template = bpy.types.BONE_PT_constraints.target_template
+        self.ik_template = bpy.types.BONE_PT_constraints.ik_template
+        self._getConstraintClip = bpy.types.BONE_PT_constraints._getConstraintClip
+
+        self.CAMERA_SOLVER = bpy.types.BONE_PT_constraints.CAMERA_SOLVER
+        self.FOLLOW_TRACK = bpy.types.BONE_PT_constraints.FOLLOW_TRACK
+        self.OBJECT_SOLVER = bpy.types.BONE_PT_constraints.OBJECT_SOLVER
+        self.COPY_LOCATION = bpy.types.BONE_PT_constraints.COPY_LOCATION
+        self.COPY_ROTATION = bpy.types.BONE_PT_constraints.COPY_ROTATION
+        self.COPY_SCALE = bpy.types.BONE_PT_constraints.COPY_SCALE
+        self.COPY_TRANSFORMS = bpy.types.BONE_PT_constraints.COPY_TRANSFORMS
+        self.LIMIT_DISTANCE = bpy.types.BONE_PT_constraints.LIMIT_DISTANCE
+        self.LIMIT_LOCATION = bpy.types.BONE_PT_constraints.LIMIT_LOCATION
+        self.LIMIT_ROTATION = bpy.types.BONE_PT_constraints.LIMIT_ROTATION
+        self.LIMIT_SCALE = bpy.types.BONE_PT_constraints.LIMIT_SCALE
+        self.MAINTAIN_VOLUME = bpy.types.BONE_PT_constraints.MAINTAIN_VOLUME
+        self.TRANSFORM = bpy.types.BONE_PT_constraints.TRANSFORM
+        self.TRANSFORM_CACHE = bpy.types.BONE_PT_constraints.TRANSFORM_CACHE
+        self.CLAMP_TO = bpy.types.BONE_PT_constraints.CLAMP_TO
+        self.DAMPED_TRACK = bpy.types.BONE_PT_constraints.DAMPED_TRACK
+        self.IK = bpy.types.BONE_PT_constraints.IK
+        self.LOCKED_TRACK = bpy.types.BONE_PT_constraints.LOCKED_TRACK
+        self.SPLINE_IK = bpy.types.BONE_PT_constraints.SPLINE_IK
+        self.STRETCH_TO = bpy.types.BONE_PT_constraints.STRETCH_TO
+        self.TRACK_TO = bpy.types.BONE_PT_constraints.TRACK_TO
+        self.ACTION = bpy.types.BONE_PT_constraints.ACTION
+        self.CHILD_OF = bpy.types.BONE_PT_constraints.CHILD_OF
+        self.FLOOR = bpy.types.BONE_PT_constraints.FLOOR
+        self.FOLLOW_PATH = bpy.types.BONE_PT_constraints.FOLLOW_PATH
+        self.PIVOT = bpy.types.BONE_PT_constraints.PIVOT
+        self.SHRINKWRAP = bpy.types.BONE_PT_constraints.SHRINKWRAP
 
 
     def material(self, context):
@@ -658,47 +672,36 @@ class datablock:
 
 
     def poll_check(self, context, panel, type):
-        try:
-            if panel.id in self.poll_overrides:
-                if getattr(self, 'poll_{}'.format('_'.join(panel.id.split('_')[2:])))(context):
+        if panel.id in self.poll_overrides:
+            name = 'CYCLES' + panel.id[7:] if panel.id[:7] == 'CYCLES_' else panel.id
+            split = name.split('_')
+            name = '_'.join(split[2:])
+            if getattr(self, '{}_poll_{}'.format(split[0].lower(), name))(context):
+                return True
+        else:
+            if hasattr(type, 'poll'):
+                if type.poll(context):
                     return True
-                else:
-                    return False
             else:
-                if hasattr(type, 'poll'):
-                    if type.poll(context):
-                        return True
-                    else:
-                        return False
-                else:
-                    return True
-        except Exception as e:
-            print('\nPoll check fail for {}\n  Reason: {}\n'.format(panel.id, e))
+                return True
+        return False
 
 
     def draw_panel(self, context, column, panel, type):
-        try:
-            if panel.id in self.draw_overrides:
-                self.draw_box(context, column, panel, type, draw=getattr(self, 'draw_{}'.format('_'.join(panel.id.split('_')[2:]))))
-            else:
-                self.draw_box(context, column, panel, type)
-        except Exception as e:
-            print('\nDraw fail for {}\n  Reason: {}\n'.format(panel.id, e))
+        name = 'CYCLES' + panel.id[7:] if panel.id[:7] == 'CYCLES_' else panel.id
+        split = name.split('_')
+        name = '_'.join(split[2:])
+
+        draw_header = getattr(self, '{}_draw_header_{}'.format(split[0].lower(), name)) if panel.id in self.header_overrides else None
+        draw = getattr(self, '{}_draw_{}'.format(split[0].lower(), name)) if panel.id in self.draw_overrides else None
+
+        self.draw_box(context, column, panel, type, draw_header=draw_header, draw=draw)
 
 
     def draw_box(self, context, column, panel, type, draw_header=None, draw=None):
-
         box_column = column.column(align=self.option.context not in {'CONSTRAINT', 'MODIFIER'})
 
-        if hasattr(type, 'bl_options'):
-            if 'HIDE_HEADER' in getattr(type, 'bl_options'):
-                hidden_header = True
-            else:
-                hidden_header = False
-        else:
-            hidden_header = False
-
-        if not hidden_header:
+        if not panel.hide_header:
             box = box_column.box()
             row = box.row(align=True)
             row.alignment = 'LEFT'
@@ -726,7 +729,7 @@ class datablock:
                 column = box.column()
 
                 self.layout = column
-                if draw:
+                if draw is not None:
                     draw(context)
                 else:
                     type.draw(self, context)
@@ -735,406 +738,17 @@ class datablock:
             column = box_column
 
             self.layout = column
-            if draw:
+            if draw is not None:
                 draw(context)
             else:
                 type.draw(self, context)
 
 
-    ## overrides ##
-    # render
-
-
-    # render layer
-    def draw_freestyle_lineset(self, context):
-        layout = self.layout
-
-        render = context.scene.render
-        render_layer = render.layers.active
-        freestyle = render_layer.freestyle_settings
-        lineset = freestyle.linesets.active
-
-        layout.active = render_layer.use_freestyle
-
-        row = layout.row()
-        rows = 4 if lineset else 2
-        row.template_list("RENDERLAYER_UL_linesets", "", freestyle, "linesets", freestyle.linesets, "active_index", rows=rows)
-
-        sub = row.column(align=True)
-        sub.operator("scene.freestyle_lineset_add", icon='ZOOMIN', text="")
-        sub.operator("scene.freestyle_lineset_remove", icon='ZOOMOUT', text="")
-        sub.menu("RENDER_MT_lineset_specials", icon='DOWNARROW_HLT', text="")
-        if lineset:
-            sub.separator()
-            sub.separator()
-            sub.operator("scene.freestyle_lineset_move", icon='TRIA_UP', text="").direction = 'UP'
-            sub.operator("scene.freestyle_lineset_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
-
-            column = layout.column()
-            column.label(text="Selection By:")
-            row = column.row(align=True)
-            row.prop(lineset, "select_by_visibility", text="Visibility", toggle=True)
-            row.prop(lineset, "select_by_edge_types", text="Edge Types", toggle=True)
-            row.prop(lineset, "select_by_face_marks", text="Face Marks", toggle=True)
-            row.prop(lineset, "select_by_group", text="Group", toggle=True)
-            row.prop(lineset, "select_by_image_border", text="Image Border", toggle=True)
-
-            if lineset.select_by_visibility:
-                column.label(text="Visibility:")
-                row = column.row(align=True)
-                row.prop(lineset, "visibility", expand=True)
-                if lineset.visibility == 'RANGE':
-                    row = column.row(align=True)
-                    row.prop(lineset, "qi_start")
-                    row.prop(lineset, "qi_end")
-
-            if lineset.select_by_edge_types:
-                column.label(text="Edge Types:")
-                row = column.row()
-                row.prop(lineset, "edge_type_negation", expand=True)
-                row.prop(lineset, "edge_type_combination", expand=True)
-
-                split = column.split()
-
-                sub = split.column()
-                self.draw_edge_type_buttons(self, sub, lineset, "silhouette")
-                self.draw_edge_type_buttons(self, sub, lineset, "border")
-                self.draw_edge_type_buttons(self, sub, lineset, "contour")
-                self.draw_edge_type_buttons(self, sub, lineset, "suggestive_contour")
-                self.draw_edge_type_buttons(self, sub, lineset, "ridge_valley")
-
-                sub = split.column()
-                self.draw_edge_type_buttons(self, sub, lineset, "crease")
-                self.draw_edge_type_buttons(self, sub, lineset, "edge_mark")
-                self.draw_edge_type_buttons(self, sub, lineset, "external_contour")
-                self.draw_edge_type_buttons(self, sub, lineset, "material_boundary")
-
-            if lineset.select_by_face_marks:
-                column.label(text="Face Marks:")
-                row = column.row()
-                row.prop(lineset, "face_mark_negation", expand=True)
-                row.prop(lineset, "face_mark_condition", expand=True)
-
-            if lineset.select_by_group:
-                column.label(text="Group:")
-                row = column.row()
-                row.prop(lineset, "group", text="")
-                row.prop(lineset, "group_negation", expand=True)
-
-
-    def draw_color_modifier(self, context, modifier):
-        layout = self.layout
-
-        column = layout.column(align=True)
-        self.draw_modifier_box_header(self, column.box(), modifier)
-        if modifier.expanded:
-            box = column.box()
-            self.draw_modifier_common(self, box, modifier)
-
-            if modifier.type == 'ALONG_STROKE':
-                self.draw_modifier_color_ramp_common(self, box, modifier, False)
-
-            elif modifier.type == 'DISTANCE_FROM_OBJECT':
-                box.prop(modifier, "target")
-                self.draw_modifier_color_ramp_common(self, box, modifier, True)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'COLOR'
-                prop.name = modifier.name
-
-            elif modifier.type == 'DISTANCE_FROM_CAMERA':
-                self.draw_modifier_color_ramp_common(self, box, modifier, True)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'COLOR'
-                prop.name = modifier.name
-
-            elif modifier.type == 'MATERIAL':
-                row = box.row()
-                row.prop(modifier, "material_attribute", text="")
-                sub = row.column()
-                sub.prop(modifier, "use_ramp")
-                if modifier.material_attribute in {'LINE', 'DIFF', 'SPEC'}:
-                    sub.active = True
-                    show_ramp = modifier.use_ramp
-                else:
-                    sub.active = False
-                    show_ramp = True
-                if show_ramp:
-                    self.draw_modifier_color_ramp_common(self, box, modifier, False)
-
-            elif modifier.type == 'TANGENT':
-                self.draw_modifier_color_ramp_common(self, box, modifier, False)
-
-            elif modifier.type == 'NOISE':
-                self.draw_modifier_color_ramp_common(self, box, modifier, False)
-                row = box.row(align=False)
-                row.prop(modifier, "amplitude")
-                row.prop(modifier, "period")
-                row.prop(modifier, "seed")
-
-            elif modifier.type == 'CREASE_ANGLE':
-                self.draw_modifier_color_ramp_common(self, box, modifier, False)
-                row = box.row(align=True)
-                row.prop(modifier, "angle_min")
-                row.prop(modifier, "angle_max")
-
-            elif modifier.type == 'CURVATURE_3D':
-                self.draw_modifier_color_ramp_common(self, box, modifier, False)
-                row = box.row(align=True)
-                row.prop(modifier, "curvature_min")
-                row.prop(modifier, "curvature_max")
-                freestyle = context.scene.render.layers.active.freestyle_settings
-                if not freestyle.use_smoothness:
-                    message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, column.box(), modifier, message)
-
-
-    def draw_alpha_modifier(self, context, modifier):
-        layout = self.layout
-
-        column = layout.column(align=True)
-        self.draw_modifier_box_header(self, column.box(), modifier)
-        if modifier.expanded:
-            box = column.box()
-            self.draw_modifier_common(self, box, modifier)
-
-            if modifier.type == 'ALONG_STROKE':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-
-            elif modifier.type == 'DISTANCE_FROM_OBJECT':
-                box.prop(modifier, "target")
-                self.draw_modifier_curve_common(self, box, modifier, True, False)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'ALPHA'
-                prop.name = modifier.name
-
-            elif modifier.type == 'DISTANCE_FROM_CAMERA':
-                self.draw_modifier_curve_common(self, box, modifier, True, False)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'ALPHA'
-                prop.name = modifier.name
-
-            elif modifier.type == 'MATERIAL':
-                box.prop(modifier, "material_attribute", text="")
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-
-            elif modifier.type == 'TANGENT':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-
-            elif modifier.type == 'NOISE':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                row = box.row(align=False)
-                row.prop(modifier, "amplitude")
-                row.prop(modifier, "period")
-                row.prop(modifier, "seed")
-
-            elif modifier.type == 'CREASE_ANGLE':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                row = box.row(align=True)
-                row.prop(modifier, "angle_min")
-                row.prop(modifier, "angle_max")
-
-            elif modifier.type == 'CURVATURE_3D':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                row = box.row(align=True)
-                row.prop(modifier, "curvature_min")
-                row.prop(modifier, "curvature_max")
-                freestyle = context.scene.render.layers.active.freestyle_settings
-                if not freestyle.use_smoothness:
-                    message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, column.box(), modifier, message)
-
-
-    def draw_thickness_modifier(self, context, modifier):
-        layout = self.layout
-
-        column = layout.column(align=True)
-        self.draw_modifier_box_header(self, column.box(), modifier)
-        if modifier.expanded:
-            box = column.box()
-            self.draw_modifier_common(self, box, modifier)
-
-            if modifier.type == 'ALONG_STROKE':
-                self.draw_modifier_curve_common(self, box, modifier, False, True)
-
-            elif modifier.type == 'DISTANCE_FROM_OBJECT':
-                box.prop(modifier, "target")
-                self.draw_modifier_curve_common(self, box, modifier, True, True)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'THICKNESS'
-                prop.name = modifier.name
-
-            elif modifier.type == 'DISTANCE_FROM_CAMERA':
-                self.draw_modifier_curve_common(self, box, modifier, True, True)
-                prop = box.operator("scene.freestyle_fill_range_by_selection")
-                prop.type = 'THICKNESS'
-                prop.name = modifier.name
-
-            elif modifier.type == 'MATERIAL':
-                box.prop(modifier, "material_attribute", text="")
-                self.draw_modifier_curve_common(self, box, modifier, False, True)
-
-            elif modifier.type == 'CALLIGRAPHY':
-                box.prop(modifier, "orientation")
-                row = box.row(align=True)
-                row.prop(modifier, "thickness_min")
-                row.prop(modifier, "thickness_max")
-
-            elif modifier.type == 'TANGENT':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                self.mapping = 'CURVE'
-                row = box.row(align=True)
-                row.prop(modifier, "thickness_min")
-                row.prop(modifier, "thickness_max")
-
-            elif modifier.type == 'NOISE':
-                row = box.row(align=False)
-                row.prop(modifier, "amplitude")
-                row.prop(modifier, "period")
-                row = box.row(align=False)
-                row.prop(modifier, "seed")
-                row.prop(modifier, "use_asymmetric")
-
-            elif modifier.type == 'CREASE_ANGLE':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                row = box.row(align=True)
-                row.prop(modifier, "thickness_min")
-                row.prop(modifier, "thickness_max")
-                row = box.row(align=True)
-                row.prop(modifier, "angle_min")
-                row.prop(modifier, "angle_max")
-
-            elif modifier.type == 'CURVATURE_3D':
-                self.draw_modifier_curve_common(self, box, modifier, False, False)
-                row = box.row(align=True)
-                row.prop(modifier, "thickness_min")
-                row.prop(modifier, "thickness_max")
-                row = box.row(align=True)
-                row.prop(modifier, "curvature_min")
-                row.prop(modifier, "curvature_max")
-                freestyle = context.scene.render.layers.active.freestyle_settings
-                if not freestyle.use_smoothness:
-                    message = "Enable Face Smoothness to use this modifier"
-                    self.draw_modifier_box_error(self, column.box(), modifier, message)
-
-
-    def draw_geometry_modifier(self, context, modifier):
-        layout = self.layout
-
-        column = layout.column(align=True)
-        self.draw_modifier_box_header(self, column.box(), modifier)
-        if modifier.expanded:
-            box = column.box()
-
-            if modifier.type == 'SAMPLING':
-                box.prop(modifier, "sampling")
-
-            elif modifier.type == 'BEZIER_CURVE':
-                box.prop(modifier, "error")
-
-            elif modifier.type == 'SINUS_DISPLACEMENT':
-                split = box.split()
-                column = split.column()
-                column.prop(modifier, "wavelength")
-                column.prop(modifier, "amplitude")
-                column = split.column()
-                column.prop(modifier, "phase")
-
-            elif modifier.type == 'SPATIAL_NOISE':
-                split = box.split()
-                column = split.column()
-                column.prop(modifier, "amplitude")
-                column.prop(modifier, "scale")
-                column.prop(modifier, "octaves")
-                column = split.column()
-                column.prop(modifier, "smooth")
-                column.prop(modifier, "use_pure_random")
-
-            elif modifier.type == 'PERLIN_NOISE_1D':
-                split = box.split()
-                column = split.column()
-                column.prop(modifier, "frequency")
-                column.prop(modifier, "amplitude")
-                column.prop(modifier, "seed")
-                column = split.column()
-                column.prop(modifier, "octaves")
-                column.prop(modifier, "angle")
-
-            elif modifier.type == 'PERLIN_NOISE_2D':
-                split = box.split()
-                column = split.column()
-                column.prop(modifier, "frequency")
-                column.prop(modifier, "amplitude")
-                column.prop(modifier, "seed")
-                column = split.column()
-                column.prop(modifier, "octaves")
-                column.prop(modifier, "angle")
-
-            elif modifier.type == 'BACKBONE_STRETCHER':
-                box.prop(modifier, "backbone_length")
-
-            elif modifier.type == 'TIP_REMOVER':
-                box.prop(modifier, "tip_length")
-
-            elif modifier.type == 'POLYGONIZATION':
-                box.prop(modifier, "error")
-
-            elif modifier.type == 'GUIDING_LINES':
-                box.prop(modifier, "offset")
-
-            elif modifier.type == 'BLUEPRINT':
-                row = box.row()
-                row.prop(modifier, "shape", expand=True)
-                box.prop(modifier, "rounds")
-                row = box.row()
-                if modifier.shape in {'CIRCLES', 'ELLIPSES'}:
-                    row.prop(modifier, "random_radius")
-                    row.prop(modifier, "random_center")
-                elif modifier.shape == 'SQUARES':
-                    row.prop(modifier, "backbone_length")
-                    row.prop(modifier, "random_backbone")
-
-            elif modifier.type == '2D_OFFSET':
-                row = box.row(align=True)
-                row.prop(modifier, "start")
-                row.prop(modifier, "end")
-                row = box.row(align=True)
-                row.prop(modifier, "x")
-                row.prop(modifier, "y")
-
-            elif modifier.type == '2D_TRANSFORM':
-                box.prop(modifier, "pivot")
-                if modifier.pivot == 'PARAM':
-                    box.prop(modifier, "pivot_u")
-                elif modifier.pivot == 'ABSOLUTE':
-                    row = box.row(align=True)
-                    row.prop(modifier, "pivot_x")
-                    row.prop(modifier, "pivot_y")
-                row = box.row(align=True)
-                row.prop(modifier, "scale_x")
-                row.prop(modifier, "scale_y")
-                box.prop(modifier, "angle")
-
-            elif modifier.type == 'SIMPLIFICATION':
-                box.prop(modifier, "tolerance")
-
-
-    # scene
-    @staticmethod
-    def draw_keyframing_settings(context, layout, ks, ksp):
-        datablock._draw_keyframing_setting(
-                context, layout, ks, ksp, "Needed",
-                "use_insertkey_override_needed", "use_insertkey_needed",
-                userpref_fallback="use_keyframe_insert_needed")
-
-        datablock._draw_keyframing_setting(
-                context, layout, ks, ksp, "Visual",
-                "use_insertkey_override_visual", "use_insertkey_visual",
-                userpref_fallback="use_visual_keying")
-
-        datablock._draw_keyframing_setting(
-                context, layout, ks, ksp, "XYZ to RGB",
-                "use_insertkey_override_xyz_to_rgb", "use_insertkey_xyz_to_rgb")
-
+    #####################
+    ## BEGIN OVERRIDES ##
+    #####################
+
+    ## helpers ##
 
     @staticmethod
     def _draw_keyframing_setting(context, layout, ks, ksp, label, toggle_prop, prop, userpref_fallback=None):
@@ -1160,7 +774,7 @@ class datablock:
                 propname = prop
 
         row = layout.row(align=True)
-        row.prop(item, toggle_prop, text="", icon='STYLUS_PRESSURE', toggle=True)  # XXX: needs dedicated icon
+        row.prop(item, toggle_prop, text='', icon='STYLUS_PRESSURE', toggle=True)  # XXX: needs dedicated icon
 
         subrow = row.row()
         subrow.active = getattr(item, toggle_prop)
@@ -1170,8 +784,509 @@ class datablock:
             subrow.prop(owner, propname, text=label)
 
 
+    @staticmethod
+    def panel_node_draw(layout, id_data, output_type, input_name):
+        if not id_data.use_nodes:
+            layout.operator('namestack.use_shading_nodes', icon='NODETREE')
+            return False
+
+        ntree = id_data.node_tree
+
+        node = find_node(id_data, output_type)
+        if not node:
+            layout.label(text='No output node')
+        else:
+            input = find_node_input(node, input_name)
+            layout.template_node_view(ntree, node, input)
+
+        return True
+
+
+    ## draw headers ##
+    def world_draw_header_game_environment_lighting(self, context):
+        light = context.scene.world.light_settings
+        self.layout.prop(light, 'use_environment_light', text='')
+
+
+    def world_draw_header_game_mist(self, context):
+        world = context.scene.world
+        self.layout.prop(world.mist_settings, 'use_mist', text='')
+
+
+    def world_draw_header_ambient_occlusion(self, context):
+        light = context.scene.world.light_settings
+        self.layout.prop(light, 'use_ambient_occlusion', text='')
+
+
+    def world_draw_header_environment_lighting(self, context):
+        light = context.scene.world.light_settings
+        self.layout.prop(light, 'use_environment_light', text='')
+
+
+    def world_draw_header_indirect_lighting(self, context):
+        light = context.scene.world.light_settings
+        self.layout.prop(light, 'use_indirect_light', text='')
+
+
+    def world_draw_header_mist(self, context):
+        world = context.scene.world
+        self.layout.prop(world.mist_settings, 'use_mist', text='')
+
+
+    def cyclesworld_draw_header_ambient_occlusion(self, context):
+        light = context.scene.world.light_settings
+        self.layout.prop(light, 'use_ambient_occlusion', text='')
+
+
+    def data_draw_header_pathanim(self, context):
+        curve = context.object.data
+
+        self.layout.prop(curve, 'use_path', text='')
+
+
+    ## draw ##
+    # render layer
+    def renderlayer_draw_freestyle_lineset(self, context):
+        layout = self.layout
+
+        render = context.scene.render
+        render_layer = render.layers.active
+        freestyle = render_layer.freestyle_settings
+        lineset = freestyle.linesets.active
+
+        layout.active = render_layer.use_freestyle
+
+        row = layout.row()
+        rows = 4 if lineset else 2
+        row.template_list('RENDERLAYER_UL_linesets', '', freestyle, 'linesets', freestyle.linesets, 'active_index', rows=rows)
+
+        sub = row.column(align=True)
+        sub.operator('scene.freestyle_lineset_add', icon='ZOOMIN', text='')
+        sub.operator('scene.freestyle_lineset_remove', icon='ZOOMOUT', text='')
+        sub.menu('RENDER_MT_lineset_specials', icon='DOWNARROW_HLT', text='')
+        if lineset:
+            sub.separator()
+            sub.separator()
+            sub.operator('scene.freestyle_lineset_move', icon='TRIA_UP', text='').direction = 'UP'
+            sub.operator('scene.freestyle_lineset_move', icon='TRIA_DOWN', text='').direction = 'DOWN'
+
+            column = layout.column()
+            column.label(text='Selection By:')
+            row = column.row(align=True)
+            row.prop(lineset, 'select_by_visibility', text='Visibility', toggle=True)
+            row.prop(lineset, 'select_by_edge_types', text='Edge Types', toggle=True)
+            row.prop(lineset, 'select_by_face_marks', text='Face Marks', toggle=True)
+            row.prop(lineset, 'select_by_group', text='Group', toggle=True)
+            row.prop(lineset, 'select_by_image_border', text='Image Border', toggle=True)
+
+            if lineset.select_by_visibility:
+                column.label(text='Visibility:')
+                row = column.row(align=True)
+                row.prop(lineset, 'visibility', expand=True)
+                if lineset.visibility == 'RANGE':
+                    row = column.row(align=True)
+                    row.prop(lineset, 'qi_start')
+                    row.prop(lineset, 'qi_end')
+
+            if lineset.select_by_edge_types:
+                column.label(text='Edge Types:')
+                row = column.row()
+                row.prop(lineset, 'edge_type_negation', expand=True)
+                row.prop(lineset, 'edge_type_combination', expand=True)
+
+                split = column.split()
+
+                sub = split.column()
+                self.draw_edge_type_buttons(self, sub, lineset, 'silhouette')
+                self.draw_edge_type_buttons(self, sub, lineset, 'border')
+                self.draw_edge_type_buttons(self, sub, lineset, 'contour')
+                self.draw_edge_type_buttons(self, sub, lineset, 'suggestive_contour')
+                self.draw_edge_type_buttons(self, sub, lineset, 'ridge_valley')
+
+                sub = split.column()
+                self.draw_edge_type_buttons(self, sub, lineset, 'crease')
+                self.draw_edge_type_buttons(self, sub, lineset, 'edge_mark')
+                self.draw_edge_type_buttons(self, sub, lineset, 'external_contour')
+                self.draw_edge_type_buttons(self, sub, lineset, 'material_boundary')
+
+            if lineset.select_by_face_marks:
+                column.label(text='Face Marks:')
+                row = column.row()
+                row.prop(lineset, 'face_mark_negation', expand=True)
+                row.prop(lineset, 'face_mark_condition', expand=True)
+
+            if lineset.select_by_group:
+                column.label(text='Group:')
+                row = column.row()
+                row.prop(lineset, 'group', text='')
+                row.prop(lineset, 'group_negation', expand=True)
+
+
+    def renderlayer_draw_color_modifier(self, context, modifier):
+        layout = self.layout
+
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
+        if modifier.expanded:
+            box = column.box()
+            self.draw_modifier_common(self, box, modifier)
+
+            if modifier.type == 'ALONG_STROKE':
+                self.draw_modifier_color_ramp_common(self, box, modifier, False)
+
+            elif modifier.type == 'DISTANCE_FROM_OBJECT':
+                box.prop(modifier, 'target')
+                self.draw_modifier_color_ramp_common(self, box, modifier, True)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'COLOR'
+                prop.name = modifier.name
+
+            elif modifier.type == 'DISTANCE_FROM_CAMERA':
+                self.draw_modifier_color_ramp_common(self, box, modifier, True)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'COLOR'
+                prop.name = modifier.name
+
+            elif modifier.type == 'MATERIAL':
+                row = box.row()
+                row.prop(modifier, 'material_attribute', text='')
+                sub = row.column()
+                sub.prop(modifier, 'use_ramp')
+                if modifier.material_attribute in {'LINE', 'DIFF', 'SPEC'}:
+                    sub.active = True
+                    show_ramp = modifier.use_ramp
+                else:
+                    sub.active = False
+                    show_ramp = True
+                if show_ramp:
+                    self.draw_modifier_color_ramp_common(self, box, modifier, False)
+
+            elif modifier.type == 'TANGENT':
+                self.draw_modifier_color_ramp_common(self, box, modifier, False)
+
+            elif modifier.type == 'NOISE':
+                self.draw_modifier_color_ramp_common(self, box, modifier, False)
+                row = box.row(align=False)
+                row.prop(modifier, 'amplitude')
+                row.prop(modifier, 'period')
+                row.prop(modifier, 'seed')
+
+            elif modifier.type == 'CREASE_ANGLE':
+                self.draw_modifier_color_ramp_common(self, box, modifier, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'angle_min')
+                row.prop(modifier, 'angle_max')
+
+            elif modifier.type == 'CURVATURE_3D':
+                self.draw_modifier_color_ramp_common(self, box, modifier, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'curvature_min')
+                row.prop(modifier, 'curvature_max')
+                freestyle = context.scene.render.layers.active.freestyle_settings
+                if not freestyle.use_smoothness:
+                    message = 'Enable Face Smoothness to use this modifier'
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
+
+
+    def renderlayer_draw_alpha_modifier(self, context, modifier):
+        layout = self.layout
+
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
+        if modifier.expanded:
+            box = column.box()
+            self.draw_modifier_common(self, box, modifier)
+
+            if modifier.type == 'ALONG_STROKE':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+
+            elif modifier.type == 'DISTANCE_FROM_OBJECT':
+                box.prop(modifier, 'target')
+                self.draw_modifier_curve_common(self, box, modifier, True, False)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'ALPHA'
+                prop.name = modifier.name
+
+            elif modifier.type == 'DISTANCE_FROM_CAMERA':
+                self.draw_modifier_curve_common(self, box, modifier, True, False)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'ALPHA'
+                prop.name = modifier.name
+
+            elif modifier.type == 'MATERIAL':
+                box.prop(modifier, 'material_attribute', text='')
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+
+            elif modifier.type == 'TANGENT':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+
+            elif modifier.type == 'NOISE':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                row = box.row(align=False)
+                row.prop(modifier, 'amplitude')
+                row.prop(modifier, 'period')
+                row.prop(modifier, 'seed')
+
+            elif modifier.type == 'CREASE_ANGLE':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'angle_min')
+                row.prop(modifier, 'angle_max')
+
+            elif modifier.type == 'CURVATURE_3D':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'curvature_min')
+                row.prop(modifier, 'curvature_max')
+                freestyle = context.scene.render.layers.active.freestyle_settings
+                if not freestyle.use_smoothness:
+                    message = 'Enable Face Smoothness to use this modifier'
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
+
+
+    def renderlayer_draw_thickness_modifier(self, context, modifier):
+        layout = self.layout
+
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
+        if modifier.expanded:
+            box = column.box()
+            self.draw_modifier_common(self, box, modifier)
+
+            if modifier.type == 'ALONG_STROKE':
+                self.draw_modifier_curve_common(self, box, modifier, False, True)
+
+            elif modifier.type == 'DISTANCE_FROM_OBJECT':
+                box.prop(modifier, 'target')
+                self.draw_modifier_curve_common(self, box, modifier, True, True)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'THICKNESS'
+                prop.name = modifier.name
+
+            elif modifier.type == 'DISTANCE_FROM_CAMERA':
+                self.draw_modifier_curve_common(self, box, modifier, True, True)
+                prop = box.operator('scene.freestyle_fill_range_by_selection')
+                prop.type = 'THICKNESS'
+                prop.name = modifier.name
+
+            elif modifier.type == 'MATERIAL':
+                box.prop(modifier, 'material_attribute', text='')
+                self.draw_modifier_curve_common(self, box, modifier, False, True)
+
+            elif modifier.type == 'CALLIGRAPHY':
+                box.prop(modifier, 'orientation')
+                row = box.row(align=True)
+                row.prop(modifier, 'thickness_min')
+                row.prop(modifier, 'thickness_max')
+
+            elif modifier.type == 'TANGENT':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                self.mapping = 'CURVE'
+                row = box.row(align=True)
+                row.prop(modifier, 'thickness_min')
+                row.prop(modifier, 'thickness_max')
+
+            elif modifier.type == 'NOISE':
+                row = box.row(align=False)
+                row.prop(modifier, 'amplitude')
+                row.prop(modifier, 'period')
+                row = box.row(align=False)
+                row.prop(modifier, 'seed')
+                row.prop(modifier, 'use_asymmetric')
+
+            elif modifier.type == 'CREASE_ANGLE':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'thickness_min')
+                row.prop(modifier, 'thickness_max')
+                row = box.row(align=True)
+                row.prop(modifier, 'angle_min')
+                row.prop(modifier, 'angle_max')
+
+            elif modifier.type == 'CURVATURE_3D':
+                self.draw_modifier_curve_common(self, box, modifier, False, False)
+                row = box.row(align=True)
+                row.prop(modifier, 'thickness_min')
+                row.prop(modifier, 'thickness_max')
+                row = box.row(align=True)
+                row.prop(modifier, 'curvature_min')
+                row.prop(modifier, 'curvature_max')
+                freestyle = context.scene.render.layers.active.freestyle_settings
+                if not freestyle.use_smoothness:
+                    message = 'Enable Face Smoothness to use this modifier'
+                    self.draw_modifier_box_error(self, column.box(), modifier, message)
+
+
+    def renderlayer_draw_geometry_modifier(self, context, modifier):
+        layout = self.layout
+
+        column = layout.column(align=True)
+        self.draw_modifier_box_header(self, column.box(), modifier)
+        if modifier.expanded:
+            box = column.box()
+
+            if modifier.type == 'SAMPLING':
+                box.prop(modifier, 'sampling')
+
+            elif modifier.type == 'BEZIER_CURVE':
+                box.prop(modifier, 'error')
+
+            elif modifier.type == 'SINUS_DISPLACEMENT':
+                split = box.split()
+                column = split.column()
+                column.prop(modifier, 'wavelength')
+                column.prop(modifier, 'amplitude')
+                column = split.column()
+                column.prop(modifier, 'phase')
+
+            elif modifier.type == 'SPATIAL_NOISE':
+                split = box.split()
+                column = split.column()
+                column.prop(modifier, 'amplitude')
+                column.prop(modifier, 'scale')
+                column.prop(modifier, 'octaves')
+                column = split.column()
+                column.prop(modifier, 'smooth')
+                column.prop(modifier, 'use_pure_random')
+
+            elif modifier.type == 'PERLIN_NOISE_1D':
+                split = box.split()
+                column = split.column()
+                column.prop(modifier, 'frequency')
+                column.prop(modifier, 'amplitude')
+                column.prop(modifier, 'seed')
+                column = split.column()
+                column.prop(modifier, 'octaves')
+                column.prop(modifier, 'angle')
+
+            elif modifier.type == 'PERLIN_NOISE_2D':
+                split = box.split()
+                column = split.column()
+                column.prop(modifier, 'frequency')
+                column.prop(modifier, 'amplitude')
+                column.prop(modifier, 'seed')
+                column = split.column()
+                column.prop(modifier, 'octaves')
+                column.prop(modifier, 'angle')
+
+            elif modifier.type == 'BACKBONE_STRETCHER':
+                box.prop(modifier, 'backbone_length')
+
+            elif modifier.type == 'TIP_REMOVER':
+                box.prop(modifier, 'tip_length')
+
+            elif modifier.type == 'POLYGONIZATION':
+                box.prop(modifier, 'error')
+
+            elif modifier.type == 'GUIDING_LINES':
+                box.prop(modifier, 'offset')
+
+            elif modifier.type == 'BLUEPRINT':
+                row = box.row()
+                row.prop(modifier, 'shape', expand=True)
+                box.prop(modifier, 'rounds')
+                row = box.row()
+                if modifier.shape in {'CIRCLES', 'ELLIPSES'}:
+                    row.prop(modifier, 'random_radius')
+                    row.prop(modifier, 'random_center')
+                elif modifier.shape == 'SQUARES':
+                    row.prop(modifier, 'backbone_length')
+                    row.prop(modifier, 'random_backbone')
+
+            elif modifier.type == '2D_OFFSET':
+                row = box.row(align=True)
+                row.prop(modifier, 'start')
+                row.prop(modifier, 'end')
+                row = box.row(align=True)
+                row.prop(modifier, 'x')
+                row.prop(modifier, 'y')
+
+            elif modifier.type == '2D_TRANSFORM':
+                box.prop(modifier, 'pivot')
+                if modifier.pivot == 'PARAM':
+                    box.prop(modifier, 'pivot_u')
+                elif modifier.pivot == 'ABSOLUTE':
+                    row = box.row(align=True)
+                    row.prop(modifier, 'pivot_x')
+                    row.prop(modifier, 'pivot_y')
+                row = box.row(align=True)
+                row.prop(modifier, 'scale_x')
+                row.prop(modifier, 'scale_y')
+                box.prop(modifier, 'angle')
+
+            elif modifier.type == 'SIMPLIFICATION':
+                box.prop(modifier, 'tolerance')
+
+    # scene
+    @staticmethod
+    def scene_draw_keyframing_settings(context, layout, ks, ksp):
+        datablock._draw_keyframing_setting(
+                context, layout, ks, ksp, 'Needed',
+                'use_insertkey_override_needed', 'use_insertkey_needed',
+                userpref_fallback='use_keyframe_insert_needed')
+
+        datablock._draw_keyframing_setting(
+                context, layout, ks, ksp, 'Visual',
+                'use_insertkey_override_visual', 'use_insertkey_visual',
+                userpref_fallback='use_visual_keying')
+
+        datablock._draw_keyframing_setting(
+                context, layout, ks, ksp, 'XYZ to RGB',
+                'use_insertkey_override_xyz_to_rgb', 'use_insertkey_xyz_to_rgb')
+
+
     # world
-    def draw_context_world(self, context):
+    def world_draw_game_context_world(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        world = scene.world
+        space = context.space_data
+
+        split = layout.split(percentage=0.85)
+        split.template_ID(scene, 'world', new='world.new')
+
+
+    def world_draw_game_world(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        row = layout.row()
+        row.column().prop(world, 'horizon_color')
+        row.column().prop(world, 'zenith_color')
+        row.column().prop(world, 'ambient_color')
+
+
+    def world_draw_game_environment_lighting(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+
+        layout.active = light.use_environment_light
+
+        split = layout.split()
+        split.prop(light, 'environment_energy', text='Energy')
+        split.prop(light, 'environment_color', text='')
+
+
+    def world_draw_game_mist(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        layout.active = world.mist_settings.use_mist
+
+        layout.prop(world.mist_settings, 'falloff')
+
+        row = layout.row(align=True)
+        row.prop(world.mist_settings, 'start')
+        row.prop(world.mist_settings, 'depth')
+
+        layout.prop(world.mist_settings, 'intensity', text='Minimum Intensity')
+
+
+    def world_draw_context_world(self, context):
         layout = self.layout
 
         scene = context.scene
@@ -1179,38 +1294,38 @@ class datablock:
         texture_count = world and len(world.texture_slots.keys())
         split = layout.split(percentage=0.85)
         if scene:
-            split.template_ID(scene, "world", new="world.new")
+            split.template_ID(scene, 'world', new='world.new')
         if texture_count:
             split.label(text=str(texture_count), icon='TEXTURE')
 
 
-    def draw_preview(self, context): # XXX: crashes blender
+    def world_draw_preview(self, context):
         self.layout.template_preview(context.scene.world)
 
 
-    def draw_world(self, context):
+    def world_draw_world(self, context):
         layout = self.layout
 
         world = context.scene.world
 
         row = layout.row()
-        row.prop(world, "use_sky_paper")
-        row.prop(world, "use_sky_blend")
-        row.prop(world, "use_sky_real")
+        row.prop(world, 'use_sky_paper')
+        row.prop(world, 'use_sky_blend')
+        row.prop(world, 'use_sky_real')
 
         row = layout.row()
-        row.column().prop(world, "horizon_color")
+        row.column().prop(world, 'horizon_color')
         column = row.column()
-        column.prop(world, "zenith_color")
+        column.prop(world, 'zenith_color')
         column.active = world.use_sky_blend
-        row.column().prop(world, "ambient_color")
+        row.column().prop(world, 'ambient_color')
 
         row = layout.row()
-        row.prop(world, "exposure")
-        row.prop(world, "color_range")
+        row.prop(world, 'exposure')
+        row.prop(world, 'color_range')
 
 
-    def draw_ambient_occlusion(self, context):
+    def world_draw_ambient_occlusion(self, context):
         layout = self.layout
 
         light = context.scene.world.light_settings
@@ -1218,85 +1333,233 @@ class datablock:
         layout.active = light.use_ambient_occlusion
 
         split = layout.split()
-        split.prop(light, "ao_factor", text="Factor")
-        split.prop(light, "ao_blend_type", text="")
+        split.prop(light, 'ao_factor', text='Factor')
+        split.prop(light, 'ao_blend_type', text='')
 
 
-    @staticmethod
-    def poll_context_world(context):
-        return context.scene.world
+    def world_draw_environment_lighting(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+
+        layout.active = light.use_environment_light
+
+        split = layout.split()
+        split.prop(light, 'environment_energy', text='Energy')
+        split.prop(light, 'environment_color', text='')
 
 
-    @staticmethod
-    def poll_preview(context):
-        return datablock.poll_context_world(context)
+    def world_draw_indirect_lighting(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+
+        layout.active = light.use_indirect_light and light.gather_method == 'APPROXIMATE'
+
+        split = layout.split()
+        split.prop(light, 'indirect_factor', text='Factor')
+        split.prop(light, 'indirect_bounces', text='Bounces')
+
+        if light.gather_method == 'RAYTRACE':
+            layout.label(text='Only works with Approximate gather method')
 
 
-    @staticmethod
-    def poll_world(context):
-        return datablock.poll_context_world(context)
+    def world_draw_gather(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+
+        layout.active = light.use_ambient_occlusion or light.use_environment_light or light.use_indirect_light
+
+        layout.row().prop(light, 'gather_method', expand=True)
+
+        split = layout.split()
+
+        col = split.column()
+        col.label(text='Attenuation:')
+        if light.gather_method == 'RAYTRACE':
+            col.prop(light, 'distance')
+        col.prop(light, 'use_falloff')
+        sub = col.row()
+        sub.active = light.use_falloff
+        sub.prop(light, 'falloff_strength', text='Strength')
+
+        if light.gather_method == 'RAYTRACE':
+            col = split.column()
+
+            col.label(text='Sampling:')
+            col.prop(light, 'sample_method', text='')
+
+            sub = col.column()
+            sub.prop(light, 'samples')
+
+            if light.sample_method == 'ADAPTIVE_QMC':
+                sub.prop(light, 'threshold')
+                sub.prop(light, 'adapt_to_speed', slider=True)
+            elif light.sample_method == 'CONSTANT_JITTERED':
+                sub.prop(light, 'bias')
+
+        if light.gather_method == 'APPROXIMATE':
+            col = split.column()
+
+            col.label(text='Sampling:')
+            col.prop(light, 'passes')
+            col.prop(light, 'error_threshold', text='Error')
+            col.prop(light, 'use_cache')
+            col.prop(light, 'correction')
 
 
-    @staticmethod
-    def poll_ambient_occlusion(context):
-        return datablock.poll_context_world(context)
+    def world_draw_mist(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        layout.active = world.mist_settings.use_mist
+
+        split = layout.split()
+
+        col = split.column()
+        col.prop(world.mist_settings, 'intensity')
+        col.prop(world.mist_settings, 'start')
+
+        col = split.column()
+        col.prop(world.mist_settings, 'depth')
+        col.prop(world.mist_settings, 'height')
+
+        layout.prop(world.mist_settings, 'falloff')
 
 
-    @staticmethod
-    def poll_environment_lighting(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_preview(self, context):
+        self.layout.template_preview(context.scene.world)
 
 
-    @staticmethod
-    def poll_indirect_lighting(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_surface(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        if not self.panel_node_draw(layout, world, 'OUTPUT_WORLD', 'Surface'):
+            row = layout.row()
+            row.prop(world, 'horizon_color', text='Color')
 
 
-    @staticmethod
-    def poll_gather(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_volume(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+        self.panel_node_draw(layout, world, 'OUTPUT_WORLD', 'Volume')
 
 
-    @staticmethod
-    def poll_mist(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_ambient_occlusion(self, context):
+        layout = self.layout
+
+        light = context.scene.world.light_settings
+        scene = context.scene
+
+        row = layout.row()
+        sub = row.row()
+        sub.active = light.use_ambient_occlusion or scene.render.use_simplify
+        sub.prop(light, 'ao_factor', text='Factor')
+        row.prop(light, 'distance', text='Distance')
 
 
-    @staticmethod
-    def poll_game_context_world(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_mist(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+
+        split = layout.split(align=True)
+        split.prop(world.mist_settings, 'start')
+        split.prop(world.mist_settings, 'depth')
+
+        layout.prop(world.mist_settings, 'falloff')
 
 
-    @staticmethod
-    def poll_game_environment_lighting(context):
-        return datablock.poll_context_world(context)
+    def cyclesworld_draw_ray_visibility(self, context):
+        layout = self.layout
+
+        world = context.scene.world
+        visibility = world.cycles_visibility
+
+        flow = layout.column_flow()
+
+        flow.prop(visibility, 'camera')
+        flow.prop(visibility, 'diffuse')
+        flow.prop(visibility, 'glossy')
+        flow.prop(visibility, 'transmission')
+        flow.prop(visibility, 'scatter')
 
 
+    def cyclesworld_draw_settings(self, context):
+        layout = self.layout
 
-    @staticmethod
-    def poll_game_mist(context):
-        return datablock.poll_context_world(context)
+        world = context.scene.world
+        cworld = world.cycles
+        # cscene = context.scene.cycles
+
+        split = layout.split()
+
+        col = split.column()
+
+        col.label(text='Surface:')
+        col.prop(cworld, 'sample_as_light', text='Multiple Importance')
+
+        sub = col.column(align=True)
+        sub.active = cworld.sample_as_light
+        sub.prop(cworld, 'sample_map_resolution')
+        if use_branched_path(context):
+            subsub = sub.row(align=True)
+            subsub.active = use_sample_all_lights(context)
+            subsub.prop(cworld, 'samples')
+        sub.prop(cworld, 'max_bounces')
+
+        col = split.column()
+        col.label(text='Volume:')
+        sub = col.column()
+        sub.active = use_cpu(context)
+        sub.prop(cworld, 'volume_sampling', text='')
+        col.prop(cworld, 'volume_interpolation', text='')
+        col.prop(cworld, 'homogeneous_volume', text='Homogeneous')
 
 
-    @staticmethod
-    def poll_world_volume(context):
-        return context.scene.world.node_tree
+    # object
+    def object_draw_context_object(self, context):
+        layout = self.layout
+        row = layout.row()
+        row.template_ID(context.scene.objects, 'active')
 
 
-    @staticmethod
-    def poll_world_mist(context):
-        for layer in context.scene.render.layers:
-            if layer.use_pass_mist:
-                return True
+    def object_draw_motion_paths(self, context):
+        ob = context.object
+        avs = ob.animation_visualization
+        mpath = ob.motion_path
+
+        bl_ui.properties_animviz.MotionPathButtonsPanel.draw_settings(self, context, avs, mpath)
 
 
-    def draw_modifiers(self, context):
-
+    def object_draw_constraints(self, context):
         layout = self.layout
 
         object = context.active_object
 
-        layout.operator_menu_enum("object.modifier_add", "type")
+        layout.operator_menu_enum('object.constraint_add', 'type')
+
+        for constraint in object.constraints:
+            box = layout.template_constraint(constraint)
+            if box:
+                getattr(self, constraint.type)(self, context, box, constraint)
+
+                if constraint.type not in {'RIGID_BODY_JOIN', 'NULL'}:
+                    box.prop(constraint, 'influence')
+
+
+    # data
+    def data_draw_modifiers(self, context):
+        layout = self.layout
+
+        object = context.active_object
+
+        layout.operator_menu_enum('object.modifier_add', 'type')
 
         for modifier in object.modifiers:
             box = layout.template_modifier(modifier)
@@ -1304,12 +1567,506 @@ class datablock:
                 getattr(self, modifier.type)(self, box, object, modifier)
 
 
-class namer:
+    def data_draw_context_mesh(self, context):
+        layout = self.layout
+
+        ob = context.object
+        layout.template_ID(ob, 'data')
+
+
+    def data_draw_normals(self, context):
+        layout = self.layout
+
+        mesh = context.object.data
+
+        split = layout.split()
+
+        col = split.column()
+        col.prop(mesh, 'use_auto_smooth')
+        sub = col.column()
+        sub.active = mesh.use_auto_smooth and not mesh.has_custom_normals
+        sub.prop(mesh, 'auto_smooth_angle', text='Angle')
+
+        split.prop(mesh, 'show_double_sided')
+
+
+    def data_draw_texture_space(self, context):
+        layout = self.layout
+
+        mesh = context.object.data
+
+        layout.prop(mesh, 'texture_mesh')
+
+        layout.separator()
+
+        layout.prop(mesh, 'use_auto_texspace')
+        row = layout.row()
+        row.column().prop(mesh, 'texspace_location', text='Location')
+        row.column().prop(mesh, 'texspace_size', text='Size')
+
+
+    def data_draw_uv_texture(self, context):
+        layout = self.layout
+
+        me = context.object.data
+
+        row = layout.row()
+        col = row.column()
+
+        col.template_list('MESH_UL_uvmaps_vcols', 'uvmaps', me, 'uv_textures', me.uv_textures, 'active_index', rows=1)
+
+        col = row.column(align=True)
+        col.operator('mesh.uv_texture_add', icon='ZOOMIN', text='')
+        col.operator('mesh.uv_texture_remove', icon='ZOOMOUT', text='')
+
+
+    def data_draw_vertex_colors(self, context):
+        layout = self.layout
+
+        me = context.object.data
+
+        row = layout.row()
+        col = row.column()
+
+        col.template_list('MESH_UL_uvmaps_vcols', 'vcols', me, 'vertex_colors', me.vertex_colors, 'active_index', rows=1)
+
+        col = row.column(align=True)
+        col.operator('mesh.vertex_color_add', icon='ZOOMIN', text='')
+        col.operator('mesh.vertex_color_remove', icon='ZOOMOUT', text='')
+
+
+    def data_draw_customdata(self, context):
+        layout = self.layout
+
+        obj = context.object
+        me = obj.data
+        col = layout.column()
+
+        col.operator('mesh.customdata_mask_clear', icon='X')
+        col.operator('mesh.customdata_skin_clear', icon='X')
+
+        if me.has_custom_normals:
+            col.operator('mesh.customdata_custom_splitnormals_clear', icon='X')
+        else:
+            col.operator('mesh.customdata_custom_splitnormals_add', icon='ZOOMIN')
+
+        col = layout.column()
+
+        col.enabled = (obj.mode != 'EDIT')
+        col.prop(me, 'use_customdata_vertex_bevel')
+        col.prop(me, 'use_customdata_edge_bevel')
+        col.prop(me, 'use_customdata_edge_crease')
+
+
+    def data_draw_context_curve(self, context):
+        layout = self.layout
+
+        obj = context.object
+        layout.template_ID(obj, 'data')
+
+
+    def data_draw_shape_curve(self, context):
+        layout = self.layout
+
+        curve = context.object.data
+        is_surf = type(curve) is SurfaceCurve
+        is_curve = type(curve) is Curve
+        is_text = type(curve) is TextCurve
+
+        if is_curve:
+            row = layout.row()
+            row.prop(curve, 'dimensions', expand=True)
+
+        split = layout.split()
+
+        col = split.column()
+        col.label(text='Resolution:')
+        sub = col.column(align=True)
+        sub.prop(curve, 'resolution_u', text='Preview U')
+        sub.prop(curve, 'render_resolution_u', text='Render U')
+        if is_curve:
+            col.label(text='Twisting:')
+            col.prop(curve, 'twist_mode', text='')
+            col.prop(curve, 'twist_smooth', text='Smooth')
+        elif is_text:
+            col.label(text='Display:')
+            col.prop(curve, 'use_fast_edit', text='Fast Editing')
+
+        col = split.column()
+
+        if is_surf:
+            sub = col.column()
+            sub.label(text='')
+            sub = col.column(align=True)
+            sub.prop(curve, 'resolution_v', text='Preview V')
+            sub.prop(curve, 'render_resolution_v', text='Render V')
+
+        if is_curve or is_text:
+            col.label(text='Fill:')
+            sub = col.column()
+            sub.active = (curve.dimensions == '2D' or (curve.bevel_object is None and curve.dimensions == '3D'))
+            sub.prop(curve, 'fill_mode', text='')
+            col.prop(curve, 'use_fill_deform')
+
+        if is_curve:
+            col.label(text='Path/Curve-Deform:')
+            sub = col.column()
+            subsub = sub.row()
+            subsub.prop(curve, 'use_radius')
+            subsub.prop(curve, 'use_stretch')
+            sub.prop(curve, 'use_deform_bounds')
+
+
+    def data_draw_pathanim(self, context):
+        layout = self.layout
+
+        curve = context.object.data
+
+        layout.active = curve.use_path
+
+        col = layout.column()
+        col.prop(curve, 'path_duration', text='Frames')
+        col.prop(curve, 'eval_time')
+
+        # these are for paths only
+        row = layout.row()
+        row.prop(curve, 'use_path_follow')
+
+
+    def data_draw_active_spline(self, context):
+        layout = self.layout
+
+        curve = context.object.data
+        act_spline = curve.splines.active
+        is_surf = type(curve) is SurfaceCurve
+        is_poly = (act_spline.type == 'POLY')
+
+        split = layout.split()
+
+        if is_poly:
+            # These settings are below but its easier to have
+            # polys set aside since they use so few settings
+            row = layout.row()
+            row.label(text='Cyclic:')
+            row.prop(act_spline, 'use_cyclic_u', text='U')
+
+            layout.prop(act_spline, 'use_smooth')
+        else:
+            col = split.column()
+            col.label(text='Cyclic:')
+            if act_spline.type == 'NURBS':
+                col.label(text='Bezier:')
+                col.label(text='Endpoint:')
+                col.label(text='Order:')
+
+            col.label(text='Resolution:')
+
+            col = split.column()
+            col.prop(act_spline, 'use_cyclic_u', text='U')
+
+            if act_spline.type == 'NURBS':
+                sub = col.column()
+                # sub.active = (not act_spline.use_cyclic_u)
+                sub.prop(act_spline, 'use_bezier_u', text='U')
+                sub.prop(act_spline, 'use_endpoint_u', text='U')
+
+                sub = col.column()
+                sub.prop(act_spline, 'order_u', text='U')
+            col.prop(act_spline, 'resolution_u', text='U')
+
+            if is_surf:
+                col = split.column()
+                col.prop(act_spline, 'use_cyclic_v', text='V')
+
+                # its a surface, assume its a nurbs
+                sub = col.column()
+                sub.active = (not act_spline.use_cyclic_v)
+                sub.prop(act_spline, 'use_bezier_v', text='V')
+                sub.prop(act_spline, 'use_endpoint_v', text='V')
+                sub = col.column()
+                sub.prop(act_spline, 'order_v', text='V')
+                sub.prop(act_spline, 'resolution_v', text='V')
+
+            if act_spline.type == 'BEZIER':
+                col = layout.column()
+                col.label(text='Interpolation:')
+
+                sub = col.column()
+                sub.active = (curve.dimensions == '3D')
+                sub.prop(act_spline, 'tilt_interpolation', text='Tilt')
+
+                col.prop(act_spline, 'radius_interpolation', text='Radius')
+
+            layout.prop(act_spline, 'use_smooth')
+
+
+    def data_draw_font(self, context):
+        layout = self.layout
+
+        text = context.object.data
+        char = context.object.data.edit_format
+
+        row = layout.split(percentage=0.25)
+        row.label(text='Regular')
+        row.template_ID(text, 'font', open='font.open', unlink='font.unlink')
+        row = layout.split(percentage=0.25)
+        row.label(text='Bold')
+        row.template_ID(text, 'font_bold', open='font.open', unlink='font.unlink')
+        row = layout.split(percentage=0.25)
+        row.label(text='Italic')
+        row.template_ID(text, 'font_italic', open='font.open', unlink='font.unlink')
+        row = layout.split(percentage=0.25)
+        row.label(text='Bold & Italic')
+        row.template_ID(text, 'font_bold_italic', open='font.open', unlink='font.unlink')
+
+        # layout.prop(text, 'font')
+
+        split = layout.split()
+
+        col = split.column()
+        col.prop(text, 'size', text='Size')
+        col = split.column()
+        col.prop(text, 'shear')
+
+        split = layout.split()
+
+        col = split.column()
+        col.label(text='Object Font:')
+        col.prop(text, 'family', text='')
+
+        col = split.column()
+        col.label(text='Text on Curve:')
+        col.prop(text, 'follow_curve', text='')
+
+        split = layout.split()
+
+        col = split.column()
+        sub = col.column(align=True)
+        sub.label(text='Underline:')
+        sub.prop(text, 'underline_position', text='Position')
+        sub.prop(text, 'underline_height', text='Thickness')
+
+        col = split.column()
+        col.label(text='Character:')
+        col.prop(char, 'use_bold')
+        col.prop(char, 'use_italic')
+        col.prop(char, 'use_underline')
+
+        row = layout.row()
+        row.prop(text, 'small_caps_scale', text='Small Caps')
+        row.prop(char, 'use_small_caps')
+
+
+    def data_draw_paragraph(self, context):
+        layout = self.layout
+
+        text = context.object.data
+
+        layout.label(text='Horizontal Alignment:')
+        layout.row().prop(text, 'align_x', expand=True)
+
+        layout.label(text='Vertical Alignment:')
+        layout.row().prop(text, 'align_y', expand=True)
+
+        split = layout.split()
+
+        col = split.column(align=True)
+        col.label(text='Spacing:')
+        col.prop(text, 'space_character', text='Letter')
+        col.prop(text, 'space_word', text='Word')
+        col.prop(text, 'space_line', text='Line')
+
+        col = split.column(align=True)
+        col.label(text='Offset:')
+        col.prop(text, 'offset_x', text='X')
+        col.prop(text, 'offset_y', text='Y')
+
+
+    def data_draw_text_boxes(self, context):
+        layout = self.layout
+
+        text = context.object.data
+
+        split = layout.split()
+        col = split.column()
+        col.operator('font.textbox_add', icon='ZOOMIN')
+        col = split.column()
+
+        for i, box in enumerate(text.text_boxes):
+
+            boxy = layout.box()
+
+            row = boxy.row()
+
+            split = row.split()
+
+            col = split.column(align=True)
+
+            col.label(text='Dimensions:')
+            col.prop(box, 'width', text='Width')
+            col.prop(box, 'height', text='Height')
+
+            col = split.column(align=True)
+
+            col.label(text='Offset:')
+            col.prop(box, 'x', text='X')
+            col.prop(box, 'y', text='Y')
+
+            row.operator('font.textbox_remove', text='', icon='X', emboss=False).index = i
+
+
+    ## poll ##
+    # world
+    @staticmethod
+    def world_poll_game_context_world(self, context):
+        return True
+
+    @staticmethod
+    def world_poll_context_world(context):
+        return True
+
+    @staticmethod
+    def world_poll_preview(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_world(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_ambient_occlusion(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_environment_lighting(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_indirect_lighting(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_gather(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_mist(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_game_context_world(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_game_environment_lighting(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_game_mist(context):
+        return context.scene.world
+
+    @staticmethod
+    def world_poll_world_volume(context):
+        return context.scene.world.node_tree
+
+    @staticmethod
+    def world_poll_world_mist(context):
+        mist_pass = True in [renderlayer.use_pass_mist for renderlayer in context.scene.render.layers]
+        return context.scene.world and mist_pass
+
+    @staticmethod
+    def cyclesworld_poll_preview(context):
+        return context.scene.world
+
+    @staticmethod
+    def cyclesworld_poll_surface(context):
+        return context.scene.world
+
+    @staticmethod
+    def cyclesworld_poll_volume(context):
+        return context.scene.world and context.scene.world.node_tree
+
+    @staticmethod
+    def cyclesworld_poll_ambient_occlusion(context):
+        return context.scene.world
+
+    @staticmethod
+    def cyclesworld_poll_mist(context):
+        mist_pass = True in [renderlayer.use_pass_mist for renderlayer in context.scene.render.layers]
+        return context.scene.world and mist_pass
+
+    @staticmethod
+    def cyclesworld_poll_ray_visibility(context):
+        return context.scene.world
+
+    @staticmethod
+    def cyclesworld_poll_settings(context):
+        return context.scene.world
+
+    @staticmethod
+    def data_poll_context_mesh(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_normals(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+    
+    @staticmethod
+    def data_poll_texture_space(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_uv_texture(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_vertex_colors(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_customdata(context):
+        return context.active_object and context.active_object.type == 'MESH' and context.active_object.data
+
+    @staticmethod
+    def data_poll_context_curve(context):
+        return context.active_object.type in {'CURVE', 'SURFACE', 'FONT'} and context.active_object.data
+
+    @staticmethod
+    def data_poll_shape_curve(context):
+        return context.active_object.type in {'CURVE', 'SURFACE', 'FONT'} and context.active_object.data
+
+    @staticmethod
+    def data_poll_pathanim(context):
+        return context.active_object and context.active_object.type == 'CURVE' and context.active_object.data
+
+    @staticmethod
+    def data_poll_active_spline(self, context):
+        return context.active_object.type != 'FONT' and context.active_object.data and context.active_object.data.splines.active
+
+    @staticmethod
+    def data_poll_font(context):
+        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+
+    @staticmethod
+    def data_poll_paragraph(context):
+        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+
+    @staticmethod
+    def data_poll_text_boxes(context):
+        return context.active_object and context.active_object.type == 'FONT' and context.active_object.data
+
+
+    ###################
+    ## END OVERRIDES ##
+    ###################
+
+
+class batchname:
 
 
     def __init__(self, operator, context, specials=False):
 
-        option = get.namer.options(context)
+        option = get.batchname.options(context)
 
         layout = operator.layout
         column = layout.column()
@@ -1353,7 +2110,7 @@ class namer:
             row.prop(option, 'toggle_objects', text='', icon='RADIOBUT_OFF' if not option.toggle_objects else 'RADIOBUT_ON')
         elif category == 'Objects Data':
             row.prop(option, 'toggle_objects_data', text='', icon='RADIOBUT_OFF' if not option.toggle_objects_data else 'RADIOBUT_ON')
-        for target in get.namer.catagories[category]:
+        for target in get.batchname.catagories[category]:
             if target not in {'line_sets', 'sensors', 'controllers', 'actuators'}:row.prop(option, target, text='', icon=get.icon(target))
             elif target == 'line_sets':
                 row.prop(option, target, text='Line Sets', toggle=True)
@@ -1366,12 +2123,12 @@ class namer:
 
         layout = operator.layout
 
-        if get.namer.options(context).mode == 'NAME':
-            naming = get.namer.options(context).naming['options']
-            option = naming.operations[naming.active_index]
+        if get.batchname.options(context).mode == 'NAME':
+            naming = get.batchname.options(context).name_options['options']
+            option = naming.operation_options[naming.active_index]
 
         else:
-            option = get.namer.options(context).sorting['options']
+            option = get.batchname.options(context).sort_options['options']
 
         layout.prop(option, 'case_sensitive')
         layout.prop(option, 're')
@@ -1382,8 +2139,8 @@ class namer:
 
         layout = operator.layout
 
-        naming = get.namer.options(context).naming['options']
-        option = naming.operations[naming.active_index]
+        naming = get.batchname.options(context).name_options['options']
+        option = naming.operation_options[naming.active_index]
 
         layout.prop(option, 'move_case_sensitive')
         layout.prop(option, 'move_re')
@@ -1394,8 +2151,8 @@ class namer:
 
         layout = operator.layout
 
-        naming = get.namer.options(context).naming['options']
-        option = naming.operations[naming.active_index]
+        naming = get.batchname.options(context).name_options['options']
+        option = naming.operation_options[naming.active_index]
 
         layout.prop(option, 'swap_case_sensitive')
         layout.prop(option, 'swap_re')
@@ -1410,8 +2167,8 @@ class namer:
         layout.prop(get.preferences(context), 'use_last')
         layout.prop(get.preferences(context), 'auto_name_operations')
 
-        layout.operator('wm.namer_operation_rename_active')
-        layout.operator('wm.namer_operation_rename_all')
+        layout.operator('namestack.batchname_rename_operation')
+        layout.operator('namestack.batchname_rename_all_operations')
 
 
     class mode_row:
@@ -1431,9 +2188,9 @@ class namer:
             if self.sorting and not custom_mode:
                 operation_mode = 'placement'
             else:
-                operation_mode = '{}_mode'.format(option.operation_options_mode.lower()) if not custom_mode else custom_mode
+                operation_mode = '{}_mode'.format(option.operation_mode.lower()) if not custom_mode else custom_mode
 
-            split = namer.split_row(column)
+            split = batchname.split_row(column)
             split.prop(option, operation_mode, text='')
 
             row = split.row(align=True)
@@ -1450,9 +2207,9 @@ class namer:
 
         def search_specials(self, row):
 
-            menu = 'WM_MT_namer_search_specials'
-            menu = 'WM_MT_namer_move_search_specials' if self.move else menu
-            menu = 'WM_MT_namer_swap_search_specials' if self.swap else menu
+            menu = 'namestack.batchname_search_specials'
+            menu = 'namestack.batchname_move_search_specials' if self.move else menu
+            menu = 'namestack.batchname_swap_search_specials' if self.swap else menu
 
             sub = row.row(align=True)
             sub.menu(menu, text='', icon='COLLAPSEMENU')
@@ -1563,22 +2320,22 @@ class namer:
 
         def __init__(self, operator, context, option, layout):
 
-            option = option.targeting['options']
+            option = option.target_options['options']
 
             row = layout.row()
-            row.prop(option, 'target_options_mode', expand=True)
+            row.prop(option, 'target_mode', expand=True)
 
             layout.separator()
 
             layout = layout.column(align=True)
 
-            if option.target_options_mode == 'CONTEXT':
+            if option.target_mode == 'CONTEXT':
                 self.context_area(operator, context, option, layout)
 
             else:
-                namer.datablock_buttons('Objects', option, layout, use_label=False)
-                namer.datablock_buttons('Objects Data', option, layout, use_label=False)
-                namer.datablock_buttons('Object Related', option, layout)
+                batchname.datablock_buttons('Objects', option, layout, use_label=False)
+                batchname.datablock_buttons('Objects Data', option, layout, use_label=False)
+                batchname.datablock_buttons('Object Related', option, layout)
 
                 layout.separator()
 
@@ -1586,17 +2343,17 @@ class namer:
                 row.prop(option, 'display_more')
 
                 if option.display_more:
-                    namer.datablock_buttons('Grease Pencil', option, layout)
-                    namer.datablock_buttons('Animation', option, layout)
-                    namer.datablock_buttons('Node', option, layout)
-                    namer.datablock_buttons('Particle', option, layout)
-                    namer.datablock_buttons('Freestyle', option, layout)
-                    namer.datablock_buttons('Scene', option, layout)
-                    namer.datablock_buttons('Image & Brush', option, layout)
-                    namer.datablock_buttons('Sequence', option, layout)
-                    namer.datablock_buttons('Game Engine', option, layout)
-                    namer.datablock_buttons('Misc', option, layout)
-                    # namer.datablock_buttons('Custom Properties', option, layout, use_label=False)
+                    batchname.datablock_buttons('Grease Pencil', option, layout)
+                    batchname.datablock_buttons('Animation', option, layout)
+                    batchname.datablock_buttons('Node', option, layout)
+                    batchname.datablock_buttons('Particle', option, layout)
+                    batchname.datablock_buttons('Freestyle', option, layout)
+                    batchname.datablock_buttons('Scene', option, layout)
+                    batchname.datablock_buttons('Image & Brush', option, layout)
+                    batchname.datablock_buttons('Sequence', option, layout)
+                    batchname.datablock_buttons('Game Engine', option, layout)
+                    batchname.datablock_buttons('Misc', option, layout)
+                    # batchname.datablock_buttons('Custom Properties', option, layout, use_label=False)
 
 
         class context_area:
@@ -1822,12 +2579,12 @@ class namer:
             @staticmethod
             def view_3d(operator, context, option, layout):
 
-                namer.datablock_buttons('Objects', option, layout, use_label=False)
-                namer.datablock_buttons('Objects Data', option, layout, use_label=False)
+                batchname.datablock_buttons('Objects', option, layout, use_label=False)
+                batchname.datablock_buttons('Objects Data', option, layout, use_label=False)
                 row = layout.row(align=True)
                 row.prop(option, 'target_mode', expand=True)
-                namer.datablock_buttons('Object Related', option, layout)
-                # namer.datablock_buttons('Custom Properties', option, layout)
+                batchname.datablock_buttons('Object Related', option, layout)
+                # batchname.datablock_buttons('Custom Properties', option, layout)
 
 
             class image_editor:
@@ -1963,7 +2720,7 @@ class namer:
 
         def __init__(self, operator, context, option, layout):
 
-            option = option.naming['options']
+            option = option.name_options['options']
 
             split = layout.split(percentage=0.7)
             column = split.column()
@@ -1972,19 +2729,19 @@ class namer:
 
             column = split.column(align=True)
             row = column.row(align=True)
-            row.template_list('UI_UL_list', 'namer', option, 'operations', option, 'active_index', rows=8)
+            row.template_list('UI_UL_list', 'batchname', option, 'operation_options', option, 'active_index', rows=8)
 
             column = row.column(align=True)
-            column.operator('wm.namer_operation_add', text='', icon='ZOOMIN')
-            column.operator('wm.namer_operation_remove', text='', icon='ZOOMOUT')
-            column.menu('WM_MT_namer_operation_specials', text='', icon='COLLAPSEMENU')
+            column.operator('namestack.batchname_add_operation', text='', icon='ZOOMIN')
+            column.operator('namestack.batchname_remove_operation', text='', icon='ZOOMOUT')
+            column.menu('namestack.batchname_operation_specials', text='', icon='COLLAPSEMENU')
 
             column.separator()
 
-            operator = column.operator('wm.namer_operation_move', text='', icon='TRIA_UP')
+            operator = column.operator('namestack.batchname_move_operation', text='', icon='TRIA_UP')
             operator.up = True
 
-            operator = column.operator('wm.namer_operation_move', text='', icon='TRIA_DOWN')
+            operator = column.operator('namestack.batchname_move_operation', text='', icon='TRIA_DOWN')
             operator.up = False
 
 
@@ -1993,18 +2750,18 @@ class namer:
 
             def __init__(self, option, column):
 
-                option = option.operations[option.active_index]
+                option = option.operation_options[option.active_index]
 
                 row = column.row()
-                row.prop(option, 'operation_options_mode', expand=True)
+                row.prop(option, 'operation_mode', expand=True)
                 column.separator()
 
-                getattr(self, option.operation_options_mode.lower())(option, column)
+                getattr(self, option.operation_mode.lower())(option, column)
 
 
             def replace(self, option, column):
 
-                namer.mode_row(option, column, active=option.replace_mode != 'ALL')
+                batchname.mode_row(option, column, active=option.replace_mode != 'ALL')
 
                 column.label(text='With:')
                 column.prop(option, 'replace', text='', icon='FILE_REFRESH')
@@ -2012,16 +2769,16 @@ class namer:
 
             def insert(self, option, column):
 
-                namer.mode_row(option, column, dual_position=False)
+                batchname.mode_row(option, column, dual_position=False)
 
                 if option.insert_mode not in {'PREFIX', 'SUFFIX'}:
                     column.label(text='Insert:')
-                    namer.mode_row.insert_prop(option, column.row())
+                    batchname.mode_row.insert_prop(option, column.row())
 
 
             def convert(self, option, column):
 
-                namer.mode_row(option, column, active=option.convert_mode != 'ALL')
+                batchname.mode_row(option, column, active=option.convert_mode != 'ALL')
 
                 column.label(text='Case:')
 
@@ -2046,20 +2803,20 @@ class namer:
 
             def move(self, option, column):
 
-                namer.mode_row(option, column)
+                batchname.mode_row(option, column)
 
                 column.label(text='To:')
 
-                namer.mode_row(option, column, dual_position=False, custom_mode='move_to', move=True)
+                batchname.mode_row(option, column, dual_position=False, custom_mode='move_to', move=True)
 
 
             def swap(self, option, column):
 
-                namer.mode_row(option, column)
+                batchname.mode_row(option, column)
 
                 column.label(text='With:')
 
-                namer.mode_row(option, column, custom_mode='swap_to', swap=True)
+                batchname.mode_row(option, column, custom_mode='swap_to', swap=True)
 
 
             @staticmethod
@@ -2073,14 +2830,14 @@ class namer:
 
         def __init__(self, operator, context, option, column):
 
-            option = option.sorting['options']
+            option = option.sort_options['options']
 
             row = column.row()
-            row.prop(option, 'sort_options_mode', expand=True)
+            row.prop(option, 'sort_mode', expand=True)
 
             column.separator()
 
-            getattr(self, option.sort_options_mode.lower())(option, column)
+            getattr(self, option.sort_mode.lower())(option, column)
 
 
         @staticmethod
@@ -2105,18 +2862,18 @@ class namer:
 
         def ascend(self, option, column):
 
-            if option.sort_mode == 'ALL':
-                namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
+            if option.sort_type_mode == 'ALL':
+                batchname.mode_row(option, column, active=False, custom_mode='sort_type_mode', sorting=True)
             else:
-                namer.mode_row(option, column, custom_mode='sort_mode', sorting=True)
+                batchname.mode_row(option, column, custom_mode='sort_type_mode', sorting=True)
 
 
         def descend(self, option, column):
 
-            if option.sort_mode == 'ALL':
-                namer.mode_row(option, column, active=False, custom_mode='sort_mode', sorting=True)
+            if option.sort_type_mode == 'ALL':
+                batchname.mode_row(option, column, active=False, custom_mode='sort_type_mode', sorting=True)
             else:
-                namer.mode_row(option, column, custom_mode='sort_mode')
+                batchname.mode_row(option, column, custom_mode='sort_type_mode')
 
 
         def position(self, option, column): # TODO: orientation? contains, rotation, scale, location modes, from viewport perspective?
@@ -2124,7 +2881,7 @@ class namer:
             if option.display_options:
                 getattr(self, option.fallback_mode.lower())(option, column)
             else:
-                split = namer.split_row(column)
+                split = batchname.split_row(column)
                 split.prop(option, 'starting_point', text='')
 
                 row = split.row(align=True)
@@ -2140,26 +2897,26 @@ class namer:
                     else:
                         props = ['left', 'right']
 
-                    split = namer.split_row(column, offset=-0.01)
+                    split = batchname.split_row(column, offset=-0.01)
                     split.label(text=props[0].title() + ':')
 
                     row = split.row()
                     row.prop(option, props[0], text='')
 
-                    split = namer.split_row(column, offset=-0.01)
+                    split = batchname.split_row(column, offset=-0.01)
                     split.label(text=props[1].title() + ':')
 
                     row = split.row()
                     row.prop(option, props[1], text='')
 
                     if option.placement not in {'PREFIX', 'SUFFIX'}:
-                        split = namer.split_row(column, offset=-0.01)
+                        split = batchname.split_row(column, offset=-0.01)
                         split.label(text='Separator:')
 
                         row = split.row()
                         row.prop(option, 'separator', text='', icon='ARROW_LEFTRIGHT')
 
-                    namer.mode_row(option, column, dual_position=False, sorting=True)
+                    batchname.mode_row(option, column, dual_position=False, sorting=True)
 
             self.fallback_mode_prop(option, column)
 
@@ -2184,14 +2941,15 @@ class namer:
 
         def __init__(self, operator, context, option, column):
 
-            option = option.counting['options']
+            option = option.count_options['options']
 
             row = column.row()
-            row.prop(option, 'count_options_mode', expand=True)
+            row.prop(option, 'count_mode', expand=True)
+
 
             column.separator()
 
-            getattr(self, option.count_options_mode.lower())(operator, context, option, column)
+            getattr(self, option.count_mode.lower())(operator, context, option, column)
 
 
         @staticmethod
@@ -2296,4 +3054,114 @@ class namer:
             row.prop(get.preferences(context), 'use_last')
             row.prop(get.preferences(context), 'auto_name_operations')
 
-            column.prop(get.preferences(context), 'namer_popup_width')
+            column.prop(get.preferences(context), 'batchname_popup_width')
+
+
+class preferences:
+
+
+    def __init__(self, addon, context):
+        addon.preference = get.preferences(context)
+
+        row = addon.layout.row()
+        # row.scale_y = 2
+        row.prop(addon.preference, 'mode', expand=True)
+
+        getattr(self, addon.preference.mode.lower())(addon, context)
+
+        row = addon.layout.row(align=True)
+        row.scale_y = 1.5
+        row.operator('wm.url_open', text='Report a bug').url = remote['bug_report']
+        row.operator('wm.url_open', text='Thread').url = remote['thread']
+        row.operator('wm.url_open', text='proxeIO').url = remote['proxeIO']
+
+
+    def general(self, addon, context):
+
+        box = addon.layout.box()
+
+        row = box.row()
+        row.prop(addon.preference, 'keep_session_settings')
+
+
+    def namestack(self, addon, context):
+
+        box = addon.layout.box()
+
+        row = box.row()
+        row.label(text='Location:')
+        row.prop(addon.preference, 'location', expand=True)
+
+        row = box.row()
+        row.prop(addon.preference, 'pin_active')
+
+        row = box.row()
+        row.prop(addon.preference, 'remove_item_panel')
+        row.prop(addon.preference, 'click_through')
+
+        row = box.row()
+        row.label(text='Pop-up Width:')
+        row.prop(addon.preference, 'filter_popup_width', text='')
+
+        row = box.row()
+        row.label(text='Separators:')
+        row.prop(addon.preference, 'separators', text='')
+
+
+    def datablock(self, addon, context):
+
+        box = addon.layout.box()
+
+        row = box.row()
+        row.label(text='Pop-up Width:')
+        row.prop(addon.preference, 'datablock_popup_width', text='')
+
+
+    def batchname(self, addon, context):
+
+        box = addon.layout.box()
+
+        row = box.row()
+        row.prop(addon.preference, 'use_last')
+        row.prop(addon.preference, 'auto_name_operations')
+
+        row = box.row()
+        row.label(text='Pop-up Width:')
+        row.prop(addon.preference, 'batchname_popup_width')
+
+
+    def hotkey(self, addon, context):
+
+        layout = addon.layout.box()
+        column = layout.column()
+
+        keyconfig = context.window_manager.keyconfigs.addon
+        keymap = keyconfig.keymaps['Window']
+
+        if 'namestack.datablock' in keymap.keymap_items:
+            keymapitem = keymap.keymap_items['namestack.datablock']
+            column.context_pointer_set('keymap', keymap)
+            rna_keymap_ui.draw_kmi([], keyconfig, keymap, keymapitem, column, 0)
+        else:
+            update.keymap(context, addkey=False)
+
+        if 'namestack.batchname' in keymap.keymap_items:
+            keymapitem = keymap.keymap_items['namestack.batchname']
+            column.context_pointer_set('keymap', keymap)
+            rna_keymap_ui.draw_kmi([], keyconfig, keymap, keymapitem, column, 0)
+        else:
+            update.keymap(context, addkey=False)
+
+
+    def updates(self, addon, context):
+
+        box = addon.layout.box()
+
+        row = box.row()
+        row.prop(addon, 'update_check')
+
+        row = box.row()
+        row.prop(addon, 'update_display_menu')
+        row.prop(addon, 'update_display_stack')
+
+

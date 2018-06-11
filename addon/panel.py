@@ -7,7 +7,7 @@ from .utilities import get
 
 
 class tool_shelf(Panel):
-    bl_idname = 'view3d.name_stack'
+    bl_idname = 'namestack.tools'
     bl_space_type = 'VIEW_3D'
     bl_label = 'Name'
     bl_region_type = 'TOOLS'
@@ -20,11 +20,11 @@ class tool_shelf(Panel):
 
 
     def draw(self, context):
-        interface.name_stack(self, context)
+        interface.namestack(self, context)
 
 
 class property_shelf(Panel):
-    bl_idname = 'view3d.view3d_name'
+    bl_idname = 'namestack.ui'
     bl_space_type = 'VIEW_3D'
     bl_label = 'Name'
     bl_region_type = 'UI'
@@ -36,4 +36,4 @@ class property_shelf(Panel):
 
 
     def draw(self, context):
-        interface.name_stack(self, context)
+        interface.namestack(self, context)

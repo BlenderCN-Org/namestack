@@ -9,317 +9,31 @@ from .config import defaults
 from .utilities import get, update
 
 
-class render_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['render']
-
+class panel_options(PropertyGroup):
     id = StringProperty()
 
     label = StringProperty(
         name = 'Label',
         description = 'Name to display in the box panel header',
-        default = default['label'])
+        default = '')
 
     hidden = BoolProperty(
         name = 'Hide',
         description='Hide this panel in the datablock popup',
-        default = default['hidden'])
+        default = False)
+
+    hide_header = BoolProperty(
+        name = 'Hide Header',
+        description='Hide this panels header & box background in the datablock popup',
+        default = False)
 
     collapsed = BoolProperty(
         name = 'Collapse',
         description = 'Callapse this box panel',
-        default = default['collapsed'])
+        default = True)
 
 
-class render_layer_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['render_layers']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class scene_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['scene']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class world_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['world']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class object_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['object']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class constraint_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['constraints']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class modifier_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['modifiers']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class data_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['data']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class bone_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['data']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class bone_constraint_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['data']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class material_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['material']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class texture_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['texture']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class particles_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['particles']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class physics_context(PropertyGroup):
-
-    default = defaults['preferences']['datablock']['physics']
-
-    id = StringProperty()
-
-    label = StringProperty(
-        name = 'Label',
-        description = 'Name to display in the box panel header',
-        default = default['label'])
-
-    hidden = BoolProperty(
-        name = 'Hide',
-        description='Hide this panel in the datablock popup',
-        default = default['hidden'])
-
-    collapsed = BoolProperty(
-        name = 'Collapse',
-        description = 'Callapse this box panel',
-        default = default['collapsed'])
-
-
-class datablock_settings(PropertyGroup):
-
-    default = defaults['preferences']['datablock']
+class datablock(PropertyGroup):
 
     context = EnumProperty(
         name = 'Context',
@@ -328,62 +42,62 @@ class datablock_settings(PropertyGroup):
 
     render = CollectionProperty(
         name = 'Render',
-        type = render_context)
+        type = panel_options)
 
     render_layer = CollectionProperty(
         name = 'Render Layer',
-        type = render_layer_context)
+        type = panel_options)
 
     scene = CollectionProperty(
         name = 'Scene',
-        type = scene_context)
+        type = panel_options)
 
     world = CollectionProperty(
         name = 'World',
-        type = world_context)
+        type = panel_options)
 
     object = CollectionProperty(
         name = 'Object',
-        type = object_context)
+        type = panel_options)
 
     constraint = CollectionProperty(
         name = 'Constraint',
-        type = constraint_context)
+        type = panel_options)
 
     modifier = CollectionProperty(
         name = 'Modifier',
-        type = modifier_context)
+        type = panel_options)
 
     data = CollectionProperty(
         name = 'Data',
-        type = data_context)
+        type = panel_options)
 
     bone = CollectionProperty(
         name = 'Bone',
-        type = bone_context)
+        type = panel_options)
 
     bone_constraint = CollectionProperty(
         name = 'Bone Constraint',
-        type = bone_constraint_context)
+        type = panel_options)
 
     material = CollectionProperty(
         name = 'Material',
-        type = material_context)
+        type = panel_options)
 
     texture = CollectionProperty(
         name = 'Texture',
-        type = texture_context)
+        type = panel_options)
 
     particles = CollectionProperty(
         name = 'Particles',
-        type = particles_context)
+        type = panel_options)
 
     physics = CollectionProperty(
         name = 'Physics',
-        type = physics_context)
+        type = panel_options)
 
 
-class name_stack(AddonPreferences):
+class namestack(AddonPreferences):
     bl_idname = __name__.partition('.')[0]
 
     default = defaults['preferences']
@@ -393,9 +107,9 @@ class name_stack(AddonPreferences):
         description = 'Adjust preferences',
         items = [
             ('GENERAL', 'General', ''),
-            ('PANEL', 'Panel', ''),
-            ('DATABLOCK', 'Properties', ''),
-            ('NAMER', 'Namer', ''),
+            ('NAMESTACK', 'Name Stack', ''),
+            ('DATABLOCK', 'Datablock', ''),
+            ('BATCHNAME', 'Batch Name', ''),
             ('HOTKEY', 'Hotkeys', ''),
             ('UPDATES', 'Updates', '')],
         default = default['mode'])
@@ -407,10 +121,10 @@ class name_stack(AddonPreferences):
 
     location = EnumProperty(
         name = 'Location',
-        description = 'The 3D view shelf to use for the name panel',
+        description = 'The 3D view shelf to use for the name stack',
         items = [
-            ('TOOLS', 'Tool Shelf', 'Places the name panel in the tool shelf under the tab labeled \'Name\''),
-            ('UI', 'Property Shelf', 'Places the name panel in the property shelf')],
+            ('TOOLS', 'Tool Shelf', 'Places the name stack in the tool shelf under the tab labeled \'Name\''),
+            ('UI', 'Property Shelf', 'Places the name stack in the property shelf')],
         default = default['location'])
 
     pin_active = BoolProperty(
@@ -425,17 +139,17 @@ class name_stack(AddonPreferences):
 
     remove_item_panel = BoolProperty(
         name = 'Remove Item Panel',
-        description = 'Remove the item panel from the properties shelf when the name panel is there',
+        description = 'Remove the item panel from the properties shelf when the name stack is present',
         update = update.prop_item_panel_poll,
         default = default['remove_item_panel'])
 
-    popup_width = IntProperty(
-        name = 'Width',
-        description = 'Width of the filters pop-up panel in pixels',
+    filter_popup_width = IntProperty(
+        name = 'Pop Up Width',
+        description = 'Width of the filter pop up in pixels',
         min = 200,
         max = 1000,
         subtype = 'PIXEL',
-        default = default['popup_width'])
+        default = default['filter_popup_width'])
 
     separators = IntProperty(
         name = 'Separators',
@@ -450,8 +164,8 @@ class name_stack(AddonPreferences):
         default = default['use_last'])
 
     datablock_popup_width = IntProperty(
-        name = 'Width',
-        description = 'Width of the datablock properties pop-up panel in pixels',
+        name = 'Pop Up Width',
+        description = 'Width of the datablock properties pop up in pixels',
         min = 200,
         max = 1000,
         subtype = 'PIXEL',
@@ -462,17 +176,17 @@ class name_stack(AddonPreferences):
         description = 'Automatically name operation entries based on operation modes',
         default = default['auto_name_operations'])
 
-    namer_popup_width = IntProperty(
-        name = 'Width',
-        description = 'Width of the pop-up panel in pixels',
+    batchname_popup_width = IntProperty(
+        name = 'Pop Up Width',
+        description = 'Width of the batch name pop up in pixels',
         min = 200,
         max = 1000,
         subtype = 'PIXEL',
-        default = default['namer_popup_width'])
+        default = default['batchname_popup_width'])
 
-    datablock = CollectionProperty(
+    datablock_options = CollectionProperty(
         name = 'Datablock',
-        type = datablock_settings)
+        type = datablock)
 
     update_check = BoolProperty(
         name = 'Check at startup',
@@ -481,13 +195,13 @@ class name_stack(AddonPreferences):
 
     update_display_menu = BoolProperty(
         name = 'Display menu notification',
-        description = 'Display update information in the name panel specials menu',
+        description = 'Display update notification in the name panel specials menu',
         default = default['update_display_menu'])
 
-    update_display_panel = BoolProperty(
-        name = 'Display panel notification',
-        description = 'Display update information in the name panel',
-        default = default['update_display_panel'])
+    update_display_stack = BoolProperty(
+        name = 'Display stack notification',
+        description = 'Display update notificiation in the name stack',
+        default = default['update_display_stack'])
 
     update_ready = BoolProperty(
         name = 'update_ready',
@@ -495,5 +209,4 @@ class name_stack(AddonPreferences):
         default = False)
 
     def draw(self, context):
-
-        interface.name_stack.preferences(self, context)
+        interface.preferences(self, context)

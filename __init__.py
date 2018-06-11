@@ -1,6 +1,8 @@
 # TODO: fix load factory settings addon preferences lookup error
 # TODO: implement multi-object bone selection
 '''
+Copyright (C) 2018 Trentin Shaun Frederick
+
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -18,7 +20,7 @@ bl_info = {
     'name': 'Name Stack',
     'author': 'Trentin Frederick a.k.a. proxe',
     'version': (0, '8  dev  commit: 493'),
-    'blender': (2, 79, 4),
+    'blender': (2, 79, 0),
     'location': '3D View \N{Rightwards Arrow} Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',
     'tracker_url': 'https://github.com/proxeIO/name-panel/issues',
@@ -34,7 +36,6 @@ from .addon.utilities import get, update
 
 
 def register():
-
     register_module(__name__)
 
     context = bpy.context
@@ -46,21 +47,20 @@ def register():
     if get.preferences(context).remove_item_panel:
         update.item_panel_poll()
 
-    bpy.types.WindowManager.name_stack = PointerProperty(
-        type = properties.name_stack,
-        name = 'Name Panel Addon',
-        description = 'Storage location for name panel addon options')
+    bpy.types.WindowManager.namestack = PointerProperty(
+        type = properties.namestack_main,
+        name = 'Name Stack Addon',
+        description = 'Storage location for name stack addon options')
 
     update.keymap(context)
 
 
 def unregister():
-
     context = bpy.context
     update.handlers(context, remove=True)
     update.item_panel_poll(restore=True)
 
-    del bpy.types.WindowManager.name_stack
+    del bpy.types.WindowManager.namestack
 
     update.keymap(context, remove=True)
 

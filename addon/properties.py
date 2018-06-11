@@ -7,9 +7,8 @@ from .utilities import update
 from .config import defaults
 
 
-class filter_options(PropertyGroup):
-
-    default = defaults['panel']['filters']
+class filter(PropertyGroup):
+    default = defaults['namestack']['filters']
 
     mode = EnumProperty(
         name = 'Mode',
@@ -115,12 +114,11 @@ class filter_options(PropertyGroup):
         default = default['particle_systems'])
 
 
-class operation_options(PropertyGroup):
+class operation(PropertyGroup):
+    default = defaults['batchname']['operation']
 
-    default = defaults['namer']['operation']
-
-    operation_options_mode = EnumProperty(
-         name = 'Operation Options',
+    operation_mode = EnumProperty(
+         name = 'Operation',
          description = 'Type of operation to perform',
          items = [
             ('REPLACE', 'Replace', 'Replace characters'),
@@ -130,7 +128,7 @@ class operation_options(PropertyGroup):
             ('SWAP', 'Swap', 'Swap characters'),
             ('TRANSFER', 'Transfer', 'Transfer names')],
          update = update.operation_name,
-         default = default['operation_options_mode'])
+         default = default['operation_mode'])
 
     replace_mode = EnumProperty(
         name = 'Replace Mode',
@@ -369,27 +367,26 @@ class operation_options(PropertyGroup):
         default = default['swap_after'])
 
 
-class target_options(PropertyGroup):
+class target(PropertyGroup):
+    default = defaults['batchname']['target']
 
-    default = defaults['namer']['target']
-
-    target_options_mode = EnumProperty(
-        name = 'Target Options Mode',
+    target_mode = EnumProperty(
+        name = 'Target',
         description = 'Mode',
         items = [
             ('CONTEXT', 'Context', 'Context specific datablock target options'),
             ('GLOBAL', 'Global', 'Generalized datablock target options')],
-        default = default['target_options_mode'])
+        default = default['target_mode'])
 
-    target_mode = EnumProperty(
-        name = 'Target Mode',
+    target_context_mode = EnumProperty(
+        name = 'Target Context',
         description = 'Mode',
         items = [
             ('ALL', 'All', 'All the designated targets'),
             ('SELECTED', 'Selected', 'The targets that are currently selected when possible'),
             ('SCENE', 'Scene', 'Only targets that are in the current scene when possible'),
             ('VISIBLE', 'Visible', 'The targets that are currently visible when possible')],
-        default = default['target_mode'])
+        default = default['target_context_mode'])
 
     toggle_objects = BoolProperty(
         name = 'Toggle Objects',
@@ -790,22 +787,20 @@ class target_options(PropertyGroup):
         default = default['custom_property_path'])
 
 
-class name_options(PropertyGroup):
-
-    operations = CollectionProperty(
-        type = operation_options,
+class name(PropertyGroup):
+    operation_options = CollectionProperty(
+        type = operation,
         name = 'Operations')
 
     active_index = IntProperty(
         name = 'Active Index')
 
 
-class sort_options(PropertyGroup):
+class sort(PropertyGroup):
+    default = defaults['batchname']['sort']
 
-    default = defaults['namer']['sort']
-
-    sort_options_mode = EnumProperty(
-        name = 'Sort Options Mode',
+    sort_mode = EnumProperty(
+        name = 'Sort',
         description = 'Type of sorting to perform',
         items = [
             ('NONE', 'No Sorting', 'Do not sort the names'),
@@ -814,15 +809,15 @@ class sort_options(PropertyGroup):
             ('POSITION', 'Positional', 'In positional order'),
             ('HIERARCHY', 'Hierarchy', 'In hierarchical order'),
             ('MANUAL', 'Manual', 'By defining the order')],
-        default = default['sort_options_mode'])
+        default = default['sort_mode'])
 
-    sort_mode = EnumProperty(
-        name = 'Sort Mode',
+    sort_type_mode = EnumProperty(
+        name = 'Sort Type',
         description = 'How to sort',
         items = [
             ('ALL', 'Full Name', 'Sort using entire name'),
             ('POSITION', 'Section', 'Sort using a section of the name')],
-        default = default['sort_mode'])
+        default = default['sort_type_mode'])
 
     begin = IntProperty(
         name = 'Begin',
@@ -965,19 +960,18 @@ class sort_options(PropertyGroup):
         default = default['hierarchy_mode'])
 
 
-class count_options(PropertyGroup):
+class count(PropertyGroup):
+    default = defaults['batchname']['count']
 
-    default = defaults['namer']['count']
-
-    count_options_mode = EnumProperty(
-        name = 'Count Options Mode',
+    count_mode = EnumProperty(
+        name = 'Count Mode',
         description = 'Type of counting to perform',
         items = [
             ('NONE', 'No Counting', 'Do not count the names'),
             ('NUMERIC', 'Numeric', 'Numbers'),
             ('ALPHABETIC', 'Alphabetic', 'Alphabetics'),
             ('ROMAN_NUMERAL', 'Roman Numeral', 'Roman numerals')],
-        default = default['count_options_mode'])
+        default = default['count_mode'])
 
     placement = EnumProperty(
         name = 'Placement',
@@ -1029,9 +1023,8 @@ class count_options(PropertyGroup):
         default = default['uppercase'])
 
 
-class panel_options(PropertyGroup):
-
-    default = defaults['panel']
+class namestack(PropertyGroup):
+    default = defaults['namestack']
 
     user_count = BoolProperty(
         name = 'User Count',
@@ -1058,17 +1051,16 @@ class panel_options(PropertyGroup):
         description = 'Enable regular expressions',
         default = default['regex'])
 
-    filters = CollectionProperty(
+    filter_options = CollectionProperty(
         name = 'Filter Options',
-        type = filter_options)
+        type = filter)
 
 
-class namer_options(PropertyGroup):
-
-    default = defaults['namer']
+class batchname(PropertyGroup):
+    default = defaults['batchname']
 
     mode = EnumProperty(
-        name = 'Namer Mode',
+        name = 'Batch Name Mode',
         description = 'Mode',
         items = [
             ('TARGET', 'Target', 'Choose the targets you wish to name'),
@@ -1082,33 +1074,32 @@ class namer_options(PropertyGroup):
         name = 'Options Mode',
         description = 'Mode',
         items = [
-            ('PRESETS', 'Presets', 'Namer presets'),
+            ('PRESETS', 'Presets', 'Batch name presets'),
             ('PREFERENCES', 'Preferences', 'Addon preferences')],
         default = default['options_mode'])
 
-    targeting = CollectionProperty(
+    target_options = CollectionProperty(
         name = 'Targeting',
-        type = target_options)
+        type = target)
 
-    naming = CollectionProperty(
+    name_options = CollectionProperty(
         name = 'Naming',
-        type = name_options)
+        type = name)
 
-    sorting = CollectionProperty(
+    sort_options = CollectionProperty(
         name = 'Sorting',
-        type = sort_options)
+        type = sort)
 
-    counting = CollectionProperty(
+    count_options = CollectionProperty(
         name = 'Counting',
-        type = count_options)
+        type = count)
 
 
-class name_stack(PropertyGroup):
+class namestack_main(PropertyGroup):
+    namestack_options = CollectionProperty(
+        name = 'Name Stack',
+        type = namestack)
 
-    panel = CollectionProperty(
-        name = 'Panel',
-        type = panel_options)
-
-    namer = CollectionProperty(
-        name = 'Name',
-        type = namer_options)
+    batchname_options = CollectionProperty(
+        name = 'Batch Name',
+        type = batchname)

@@ -11,55 +11,54 @@ from .config import default_panels, defaults, remote
 
 @persistent
 def keep_session_settings(none):
-
     preferences = get.preferences(bpy.context)
-    panel = get.name_stack.options(bpy.context)
-    filters = panel.filters['options']
+    stack = get.namestack.options(bpy.context)
+    filters = stack.filter_options['options']
 
     defaults['preferences']['location'] = preferences.location
     defaults['preferences']['keep_session_settings'] = preferences.keep_session_settings
     defaults['preferences']['pin_active']= preferences.pin_active
     defaults['preferences']['click_through'] = preferences.click_through
     defaults['preferences']['remove_item_panel'] = preferences.remove_item_panel
-    defaults['preferences']['popup_width'] = preferences.popup_width
+    defaults['preferences']['filter_popup_width'] = preferences.filter_popup_width
     defaults['preferences']['separators'] = preferences.separators
     defaults['preferences']['use_last'] = preferences.use_last
     defaults['preferences']['datablock_popup_width'] = preferences.datablock_popup_width
     defaults['preferences']['auto_name_operations'] = preferences.auto_name_operations
-    defaults['preferences']['namer_popup_width'] = preferences.namer_popup_width
+    defaults['preferences']['batchname_popup_width'] = preferences.batchname_popup_width
     defaults['preferences']['update_check'] = preferences.update_check
     defaults['preferences']['update_display_menu'] = preferences.update_display_menu
-    defaults['preferences']['update_display_panel'] = preferences.update_display_panel
+    defaults['preferences']['update_display_stack'] = preferences.update_display_stack
 
-    defaults['panel']['case_sensitive'] = panel.case_sensitive
-    defaults['panel']['regex'] = panel.regex
+    defaults['namestack']['case_sensitive'] = stack.case_sensitive
+    defaults['namestack']['regex'] = stack.regex
 
-    defaults['panel']['filters']['mode'] = filters.mode
-    defaults['panel']['filters']['display_mode'] = filters.display_mode
-    defaults['panel']['filters']['groups'] = filters.groups
-    defaults['panel']['filters']['grease_pencils'] = filters.grease_pencils
-    defaults['panel']['filters']['actions'] = filters.actions
-    defaults['panel']['filters']['constraints'] = filters.constraints
-    defaults['panel']['filters']['modifiers'] = filters.modifiers
-    defaults['panel']['filters']['bones'] = filters.bones
-    defaults['panel']['filters']['bone_groups'] = filters.bone_groups
-    defaults['panel']['filters']['bone_constraints'] = filters.bone_constraints
-    defaults['panel']['filters']['shapekeys'] = filters.shapekeys
-    defaults['panel']['filters']['vertex_groups'] = filters.vertex_groups
-    defaults['panel']['filters']['uv_maps'] = filters.uv_maps
-    defaults['panel']['filters']['vertex_colors'] = filters.vertex_colors
-    defaults['panel']['filters']['materials'] = filters.materials
-    defaults['panel']['filters']['textures'] = filters.textures
-    defaults['panel']['filters']['images'] = filters.images
-    defaults['panel']['filters']['particle_systems'] = filters.particle_systems
+    defaults['namestack']['filters']['mode'] = filters.mode
+    defaults['namestack']['filters']['display_mode'] = filters.display_mode
+    defaults['namestack']['filters']['groups'] = filters.groups
+    defaults['namestack']['filters']['grease_pencils'] = filters.grease_pencils
+    defaults['namestack']['filters']['actions'] = filters.actions
+    defaults['namestack']['filters']['constraints'] = filters.constraints
+    defaults['namestack']['filters']['modifiers'] = filters.modifiers
+    defaults['namestack']['filters']['bones'] = filters.bones
+    defaults['namestack']['filters']['bone_groups'] = filters.bone_groups
+    defaults['namestack']['filters']['bone_constraints'] = filters.bone_constraints
+    defaults['namestack']['filters']['shapekeys'] = filters.shapekeys
+    defaults['namestack']['filters']['vertex_groups'] = filters.vertex_groups
+    defaults['namestack']['filters']['uv_maps'] = filters.uv_maps
+    defaults['namestack']['filters']['vertex_colors'] = filters.vertex_colors
+    defaults['namestack']['filters']['materials'] = filters.materials
+    defaults['namestack']['filters']['textures'] = filters.textures
+    defaults['namestack']['filters']['images'] = filters.images
+    defaults['namestack']['filters']['particle_systems'] = filters.particle_systems
 
 
 class regex:
 
 
-    def panel_search(context, name):
+    def stack_search(context, name):
 
-        option = get.name_stack.options(context)
+        option = get.namestack.options(context)
 
         if option.find:
             if option.regex:
@@ -80,7 +79,6 @@ class regex:
 
 
 class get:
-
 
     @classmethod
     def item_panel_poll(cls, context):
@@ -109,7 +107,7 @@ class get:
 
         def remote_string():
 
-            # https://raw.githubusercontent.com/proxeIO/name-panel/master/__init__.py
+            # https://raw.githubusercontent.com/proxeIO/name-stack/master/__init__.py
             init_text = requests.get('{}{}/{}/{}/__init__.py'.format(remote['raw'], remote['user'], remote['repo'], remote['branch'])).text
 
             version = re.search(r'\'version\': [ ,\':()0-9A-z]*', init_text).group()
@@ -359,21 +357,24 @@ class get:
             return icons[type]
 
 
-    class name_stack:
+    class namestack:
 
 
         def options(context):
 
-            location = context.window_manager.name_stack.panel
+            if context.window_manager.namestack.name == '':
+                context.window_manager.namestack.name = 'options'
 
-            if not 'options' in location:
+            location = context.window_manager.namestack.namestack_options
+
+            if 'options' not in location:
                 location.add().name = 'options'
-                location['options'].filters.add().name = 'options'
+                location['options'].filter_options.add().name = 'options'
 
             return location['options']
 
 
-        class name_stack:
+        class stack:
 
             types = [
                 'groups',
@@ -393,7 +394,7 @@ class get:
 
             def __new__(self, context):
 
-                option = get.name_stack.options(context).filters['options']
+                option = get.namestack.options(context).filter_options['options']
 
                 if option.display_mode == 'ACTIVE':
                     if context.active_object:
@@ -439,23 +440,23 @@ class get:
                     for object in stack['datablocks']:
                         stack['objects'][object.name] = {
                             'datablock': object,
-                            'active': regex.panel_search(context, object.name),
+                            'active': regex.stack_search(context, object.name),
                             'types': []}
 
-                        for type in get.name_stack.name_stack.types:
+                        for type in get.namestack.stack.types:
                             if type != 'object_data':
                                 if getattr(option, type):
                                     if getattr(self, type)(context, object):
                                         stack['objects'][object.name]['types'].append(type)
 
                                         stack['objects'][object.name][type] = {
-                                            'datablocks': getattr(get.name_stack.name_stack, type)(context, object)}
+                                            'datablocks': getattr(get.namestack.stack, type)(context, object)}
 
                                         for datablock in stack['objects'][object.name][type]['datablocks']:
                                             if datablock:
                                                 stack['objects'][object.name][type][datablock.name] = {
                                                     'datablock': datablock,
-                                                    'active': regex.panel_search(context, datablock.name)}
+                                                    'active': regex.stack_search(context, datablock.name)}
 
                                                 if type in {'grease_pencils', 'modifiers', 'bones', 'materials'}:
                                                     self.subtypes(context, option, stack, object, type, datablock)
@@ -469,7 +470,7 @@ class get:
                                             'datablocks': [object.data],
                                             object.data.name: {
                                                 'datablock': object.data,
-                                                'active': regex.panel_search(context, object.data.name)}}
+                                                'active': regex.stack_search(context, object.data.name)}}
 
                             else:
                                 stack['objects'][object.name]['types'].append('object_data')
@@ -478,7 +479,7 @@ class get:
                                     'datablocks': [object.data],
                                     object.data.name: {
                                         'datablock': object.data,
-                                        'active': regex.panel_search(context, object.data.name)}}
+                                        'active': regex.stack_search(context, object.data.name)}}
 
                 return stack
 
@@ -527,8 +528,8 @@ class get:
                 bones = []
 
                 if object == context.active_object and object.type == 'ARMATURE':
-                    option = get.name_stack.options(context).filters['options']
-                    display_mode = get.name_stack.options(context).filters['options'].display_mode
+                    option = get.namestack.options(context).filter_options['options']
+                    display_mode = get.namestack.options(context).filter_options['options'].display_mode
 
                     if context.mode == 'POSE':
                         if option.display_mode == 'ACTIVE':
@@ -588,7 +589,7 @@ class get:
                     for layer in stack['objects'][object.name][type][datablock.name]['grease_pencil_layers']['datablocks']:
                         stack['objects'][object.name][type][datablock.name]['grease_pencil_layers'][layer.info] = {
                             'datablock': layer,
-                            'active': regex.panel_search(context, layer.info)}
+                            'active': regex.stack_search(context, layer.info)}
 
                 if type == 'modifiers':
                     if option.particle_systems:
@@ -596,12 +597,12 @@ class get:
                             stack['objects'][object.name][type][datablock.name]['particle_system'] = {
                                 datablock.particle_system.name: {
                                     'datablock': datablock.particle_system,
-                                    'active': regex.panel_search(context, datablock.particle_system.name)}}
+                                    'active': regex.stack_search(context, datablock.particle_system.name)}}
 
                             stack['objects'][object.name][type][datablock.name]['particle_system'][datablock.particle_system.name]['particle_settings'] = {
                                 datablock.particle_system.settings.name: {
                                     'datablock': datablock.particle_system.settings,
-                                    'active': regex.panel_search(context, datablock.particle_system.settings.name)}}
+                                    'active': regex.stack_search(context, datablock.particle_system.settings.name)}}
 
                             if option.textures and context.scene.render.engine == 'CYCLES':
                                 stack['objects'][object.name][type][datablock.name]['particle_system'][datablock.particle_system.name]['particle_settings'][datablock.particle_system.settings.name]['textures'] = {
@@ -611,7 +612,7 @@ class get:
 
                                     stack['objects'][object.name][type][datablock.name]['particle_system'][datablock.particle_system.name]['particle_settings'][datablock.particle_system.settings.name]['textures'][texture.name] = {
                                         'datablock': texture,
-                                        'active': regex.panel_search(context, texture.name)}
+                                        'active': regex.stack_search(context, texture.name)}
 
                 if type == 'bones':
                     if option.bones and option.bone_constraints:
@@ -623,7 +624,7 @@ class get:
                             for constraint in stack['objects'][object.name][type][datablock.name]['bone_constraints']['datablocks']:
                                 stack['objects'][object.name][type][datablock.name]['bone_constraints'][constraint.name] = {
                                     'datablock': constraint,
-                                    'active': regex.panel_search(context, constraint.name)}
+                                    'active': regex.stack_search(context, constraint.name)}
 
                 if type == 'materials':
                     if option.textures and context.scene.render.engine == 'BLENDER_RENDER':
@@ -633,7 +634,7 @@ class get:
                         for texture in stack['objects'][object.name][type][datablock.name]['textures']['datablocks']:
                             stack['objects'][object.name][type][datablock.name]['textures'][texture.name] = {
                                 'datablock': texture,
-                                'active': regex.panel_search(context, texture.name)}
+                                'active': regex.stack_search(context, texture.name)}
 
 
         class target:
@@ -755,7 +756,7 @@ class get:
                 return bpy.data.particles[operator.target_name]
 
 
-    class namer:
+    class batchname:
 
         catagories = {
             'Objects': [
@@ -851,25 +852,25 @@ class get:
 
         def options(context):
 
-            location = context.window_manager.name_stack.namer
+            location = context.window_manager.namestack.batchname_options
 
-            if not 'options' in location:
+            if 'options' not in location:
                 location.add().name = 'options'
-                location['options'].targeting.add().name = 'options'
-                location['options'].naming.add().name = 'options'
-                location['options'].sorting.add().name = 'options'
-                location['options'].counting.add().name = 'options'
+                location['options'].target_options.add().name = 'options'
+                location['options'].name_options.add().name = 'options'
+                location['options'].sort_options.add().name = 'options'
+                location['options'].count_options.add().name = 'options'
 
-            if not location['options'].naming['options'].operations:
-                location['options'].naming['options'].operations.add().name = 'Default'
+            if not location['options'].name_options['options'].operation_options:
+                location['options'].name_options['options'].operation_options.add().name = 'Default'
 
             return location['options']
 
 
         def operation_name(operation):
 
-            if operation.operation_options_mode not in {'CONVERT', 'TRANSFER'}:
-                mode = '{}_mode'.format(operation.operation_options_mode.lower())
+            if operation.operation_mode not in {'CONVERT', 'TRANSFER'}:
+                mode = '{}_mode'.format(operation.operation_mode.lower())
                 filler = ' at ' if mode == 'insert_mode' and operation.insert_mode == 'POSITION' else ' '
 
                 if mode in {'replace_mode', 'move_mode', 'swap_mode'} and getattr(operation, mode) == 'FIND':
@@ -878,7 +879,7 @@ class get:
                 else:
                     secondary = filler + getattr(operation, mode).title()
 
-            elif operation.operation_options_mode == 'CONVERT':
+            elif operation.operation_mode == 'CONVERT':
                 secondary = ''
 
                 if operation.case_mode != 'NONE':
@@ -893,7 +894,7 @@ class get:
             else:
                 secondary = ''
 
-            return operation.operation_options_mode.title() + secondary
+            return operation.operation_mode.title() + secondary
 
 
     class datablock:
@@ -901,22 +902,45 @@ class get:
 
         def options(context):
 
-            location = get.preferences(context).datablock
+            location = get.preferences(context).datablock_options
 
-            if not 'panel' in location:
-                location.add().name = 'panel'
+            if 'options' not in location:
+
+                location.add().name = 'options'
 
                 for panel in default_panels:
-                    collection = getattr(location['panel'], panel[0].lower())
-                    bl_label = getattr(bpy.types, panel[1]).bl_label
-                    collection.add().name = panel[1]
-                    collection[panel[1]].id = panel[1]
-                    collection[panel[1]].label = bl_label
-                    collection[panel[1]].hidden = False
-                    collection[panel[1]].collapsed = True
+                    collection = getattr(location['options'], panel[0].lower())
+                    id = panel[1]
 
+                    try:
+                        # handle panel exceptions for backwards compatability
 
-            return location['panel']
+                        type = getattr(bpy.types, id)
+
+                        hidden_header = False
+                        if hasattr(type, 'bl_options'):
+                            if 'HIDE_HEADER' in getattr(type, 'bl_options'):
+                                hidden_header = True
+
+                        name = id
+                        name = ' '.join(name.title().split('_'))
+                        name_split = name.split('Pt ')
+                        if name_split[0][:6] == 'Cycles':
+                            name = 'Cycles ' + name_split[1]
+                        else:
+                            name = name_split[1]
+                        print(name)
+                        collection.add().name = name
+                        collection[name].id = id
+                        collection[name].label = type.bl_label
+                        if hidden_header:
+                            collection[name].hide_header = hidden_header
+                            collection[name].collapsed = not hidden_header
+
+                    except Exception as e:
+                        print(panel[1], 'unavailable because:', e)
+
+            return location['options']
 
 
         def contexts(scene, context):
@@ -948,13 +972,13 @@ class get:
                     items.append(('BONE', 'Bone', '', 'BONE_DATA', 9))
                     items.append(('BONE_CONSTRAINT', 'Bone Constraints', '', 'CONSTRAINT_BONE', 9))
 
-            items.append(('TEXTURE', 'Texture', '', 'TEXTURE_DATA', 11))
+            items.append(('TEXTURE', 'Texture', '', 'TEXTURE_DATA', 10))
 
             if context.active_object:
                 if context.active_object.type == 'MESH':
-                    items.append(('PARTICLES', 'Particles', '', 'PARTICLE_DATA', 10))
+                    items.append(('PARTICLES', 'Particles', '', 'PARTICLE_DATA', 11))
 
-                items.append(('PHYSICS', 'Physics', '', 'PHYSICS', 11))
+                items.append(('PHYSICS', 'Physics', '', 'PHYSICS', 12))
 
             return items
 
@@ -1000,7 +1024,6 @@ class update:
 
 
     def handlers(context, remove=False):
-
         if get.preferences(context).keep_session_settings:
             if not remove:
                 bpy.app.handlers.load_pre.append(keep_session_settings)
@@ -1027,30 +1050,27 @@ class update:
             bpy.types.VIEW3D_PT_view3d_name.poll = get.item_panel_poll
 
 
-    def keymap(context, remove=False):
+    def keymap(context, remove=False, addkey=True):
         keymap = context.window_manager.keyconfigs.addon.keymaps.new(name='Window')
 
         if remove:
-            if 'wm.datablock_settings' in keymap.keymap_items:
-                keymap.keymap_items.remove(keymap.keymap_items['wm.namer'])
+            if 'namestack.datablock' in keymap.keymap_items:
+                keymap.keymap_items.remove(keymap.keymap_items['namestack.datablock'])
 
-            if 'wm.name' in keymap.keymap_items:
-                keymap.keymap_items.remove(keymap.keymap_items['wm.datablock_settings'])
+            if 'namestack.batchname' in keymap.keymap_items:
+                keymap.keymap_items.remove(keymap.keymap_items['namestack.batchname'])
 
         else:
-            if 'wm.datablock_settings' not in keymap.keymap_items:
-                kmi = keymap.keymap_items.new('wm.datablock_settings', 'F7', 'PRESS')
-                kmi.properties.object_name = ''
+            if 'namestack.datablock' not in keymap.keymap_items:
+                kmi = keymap.keymap_items.new('namestack.datablock','F7' if addkey else 'NONE', 'PRESS')
+                # kmi.properties.object_name = ''
 
-            if 'wm.name' not in keymap.keymap_items:
-                keymap.keymap_items.new('wm.namer', 'NONE', 'PRESS')
-
-
+            if 'namestack.batchname' not in keymap.keymap_items:
+                keymap.keymap_items.new('namestack.batchname', 'NONE', 'PRESS')
 
 
     def selection(operator, context, event):
-
-        option = get.name_stack.options(context).filters['options']
+        option = get.namestack.options(context).filter_options['options']
 
         objects = context.scene.objects
 
@@ -1111,15 +1131,13 @@ class update:
 
 
     def operation_name(operator, context):
-
-        naming = get.namer.options(context).naming['options']
-        active_operation = naming.operations[naming.active_index]
-        active_operation.name = get.namer.operation_name(active_operation)
+        naming = get.batchname.options(context).name_options['options']
+        active_operation = naming.operation_options[naming.active_index]
+        active_operation.name = get.batchname.operation_name(active_operation)
 
 
     def filter_options(operator, context):
-
-        option = get.name_stack.options(context).filters['options']
+        option = get.namestack.options(context).filter_options['options']
 
         toggles = [
             'groups',
@@ -1149,21 +1167,20 @@ class update:
 
 
     def target_options(operator, context):
-
-        option = get.namer.options(context).targeting['options']
+        option = get.batchname.options(context).target_options['options']
 
         if option.toggle_objects:
-            for target in get.namer.catagories['Objects']:
+            for target in get.batchname.catagories['Objects']:
                 setattr(option, target, True)
 
         else:
-            for target in get.namer.catagories['Objects']:
+            for target in get.batchname.catagories['Objects']:
                 setattr(option, target, False)
 
         if option.toggle_objects_data:
-            for target in get.namer.catagories['Objects Data']:
+            for target in get.batchname.catagories['Objects Data']:
                 setattr(option, target, True)
 
         else:
-            for target in get.namer.catagories['Objects Data']:
+            for target in get.batchname.catagories['Objects Data']:
                 setattr(option, target, False)
