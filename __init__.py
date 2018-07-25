@@ -14,14 +14,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 # blender info
 bl_info = {
-    'name': 'Name Panel',
-    'author': 'Trentin Frederick (proxe)',
-    'version': (1, 7, 476),
-    'blender': (2, 69, 0),
-    'location': '3D View \N{Rightwards Arrow} Tool Shelf \N{Rightwards Arrow} Name',
+    'name': 'Name Stack',
+    'author': 'proxe',
+    'version': (0, 9),
+    'blender': (2, 78, 0),
+    'location': '3D View > Tool Shelf > Name',
     'description': 'In panel datablock name stack with shortcut and batch name tools.',
-    'wiki_url': 'https://cgcookiemarkets.com/all-products/name-panel/?view=docs',
-    'tracker_url': 'https://github.com/trentinfrederick/name-panel/issues',
+    'tracker_url': 'https://github.com/trentinfrederick/name-stack/issues',
     'category': '3D View'
 }
 
