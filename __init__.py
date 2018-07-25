@@ -18,11 +18,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Name Stack',
     'author': 'proxe',
-    'version': (0, '8  dev  commit: 494'),
+    'version': (0, 9),
     'blender': (2, 79, 0),
-    'location': '3D View \N{Rightwards Arrow} Tool (T) | Property (N)',
+    'location': '3D View > Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',
-    'tracker_url': 'https://github.com/proxeIO/name-panel/issues',
+    'tracker_url': 'https://github.com/proxeIO/name-stack/issues',
     'category': '3D View'}
 
 import bpy
