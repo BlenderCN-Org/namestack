@@ -201,12 +201,6 @@ class preferences(AddonPreferences):
         prop.url = 'https://paypal.me/proxe'
 
         # operator; url open
-        prop = split.operator('wm.url_open', text='proxeIO')
-
-        # proxeIO
-        prop.url = 'https://proxeIO.github.io/'
-
-        # operator; url open
         prop = split.operator('wm.url_open', text='Github')
 
         # github
