@@ -28,14 +28,14 @@ bl_info = {
 import bpy
 from bpy.types import Operator, AddonPreferences
 from bpy.props import *
-from .scripts import options as PropertyGroup
-from .scripts.defaults import defaults
-from .scripts.interface import button, menu, name, properties
-from .scripts.interface.operator import auto, batch, copy, icon, navigate, options
-from .scripts.interface.operator.preferences import name as Pname
-from .scripts.interface.operator.preferences import auto as Pauto
-from .scripts.interface.operator.preferences import batch as Pbatch
-from .scripts.interface.operator.preferences import copy as Pcopy
+from . addon import options as PropertyGroup
+from . addon.defaults import defaults
+from . addon.interface import button, menu, name, properties
+from . addon.interface.operator import auto, batch, copy, icon, navigate, options
+from . addon.interface.operator.preferences import name as Pname
+from . addon.interface.operator.preferences import auto as Pauto
+from . addon.interface.operator.preferences import batch as Pbatch
+from . addon.interface.operator.preferences import copy as Pcopy
 
 # save
 class save(Operator):
@@ -44,7 +44,7 @@ class save(Operator):
     '''
     bl_idname = 'wm.save_name_panel_defaults'
     bl_label = 'Save'
-    bl_description = 'Save current addon options as default and update panel locations.'
+    bl_description = 'Save current addon options as default and update panel locations'
     bl_options = {'INTERNAL'}
 
     # execute
@@ -201,28 +201,16 @@ class preferences(AddonPreferences):
         prop.url = 'https://paypal.me/proxe'
 
         # operator; url open
-        prop = split.operator('wm.url_open', text='Blender Market')
-
-        # blender market
-        prop.url = 'https://cgcookiemarkets.com/all-products/name-panel/'
-
-        # operator; url open
         prop = split.operator('wm.url_open', text='proxeIO')
 
         # proxeIO
         prop.url = 'https://proxeIO.github.io/'
 
         # operator; url open
-        prop = split.operator('wm.url_open', text='Thread')
-
-        # blender artists
-        prop.url = 'http://blenderartists.org/forum/showthread.php?272086'
-
-        # operator; url open
         prop = split.operator('wm.url_open', text='Github')
 
         # github
-        prop.url = 'https://github.com/trentinfrederick/name-panel'
+        prop.url = 'https://github.com/proc/name-stack'
 
 # register
 def register():
@@ -237,70 +225,70 @@ def register():
     bpy.types.WindowManager.BatchShared = PointerProperty(
         type = PropertyGroup.batch.shared,
         name = 'Batch Shared Settings',
-        description = 'Storage location for shared settings of batch name operators.'
+        description = 'Storage location for shared settings of batch name operators'
     )
 
     # auto name
     bpy.types.WindowManager.AutoName = PointerProperty(
         type = PropertyGroup.batch.auto.options,
         name = 'Batch Auto Name Settings',
-        description = 'Storage location for the auto name operator settings.'
+        description = 'Storage location for the auto name operator settings'
     )
 
     # object names
     bpy.types.Scene.ObjectNames = PointerProperty(
         type = PropertyGroup.batch.auto.objects,
         name = 'Object Name Settings',
-        description = 'Storage location for the object names used during the auto name operation.'
+        description = 'Storage location for the object names used during the auto name operation'
     )
 
     # constraint names
     bpy.types.Scene.ConstraintNames = PointerProperty(
         type = PropertyGroup.batch.auto.constraints,
         name = 'Constraint Name Settings',
-        description = 'Storage location for the constraint names used during the auto name operation.'
+        description = 'Storage location for the constraint names used during the auto name operation'
     )
 
     # modifier names
     bpy.types.Scene.ModifierNames = PointerProperty(
         type = PropertyGroup.batch.auto.modifiers,
         name = 'Modifier Name Settings',
-        description = 'Storage location for the modifier names used during the auto name operation.'
+        description = 'Storage location for the modifier names used during the auto name operation'
     )
 
     # object data names
     bpy.types.Scene.ObjectDataNames = PointerProperty(
         type = PropertyGroup.batch.auto.objectData,
         name = 'Object Data Name Settings',
-        description = 'Storage location for the object data names used during the auto name operation.'
+        description = 'Storage location for the object data names used during the auto name operation'
     )
 
     # batch name
     bpy.types.WindowManager.BatchName = PointerProperty(
         type = PropertyGroup.batch.options,
         name = 'Batch Name Settings',
-        description = 'Storage location for the batch name operator settings.'
+        description = 'Storage location for the batch name operator settings'
     )
 
     # copy name
     bpy.types.WindowManager.CopyName = PointerProperty(
         type = PropertyGroup.batch.copy,
         name = 'Copy Name Settings',
-        description = 'Storage location for the copy name operator settings.'
+        description = 'Storage location for the copy name operator settings'
     )
 
     # name panel
     bpy.types.Scene.NamePanel = PointerProperty(
         type = PropertyGroup.options,
         name = 'Name Panel Settings',
-        description = 'Storage location for the name panel settings.'
+        description = 'Storage location for the name panel settings'
     )
 
     # property panel
     bpy.types.WindowManager.PropertyPanel = PointerProperty(
         type = PropertyGroup.properties,
         name = 'Property Panel Settings',
-        description = 'Storage location for the property panel settings.'
+        description = 'Storage location for the property panel settings'
     )
 
     # append
