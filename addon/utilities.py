@@ -84,7 +84,6 @@ class get:
     def item_panel_poll(cls, context):
         return (context.space_data and context.active_object)
 
-
     @classmethod
     def item_panel_poll_override(cls, context):
 

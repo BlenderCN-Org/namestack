@@ -209,5 +209,6 @@ class namestack(AddonPreferences):
         description = 'Used internally to determine if an update is ready',
         default = False)
 
+
     def draw(self, context):
         interface.preferences(self, context)

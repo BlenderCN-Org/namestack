@@ -265,7 +265,6 @@ class namestack:
             else:
                 self.extra_options(context)
 
-
         @staticmethod
         def set_height(column, separators):
 
@@ -329,7 +328,7 @@ class namestack:
 
 class datablock:
 
-    # TODO: hide extra settings for these datablock types if there is a target and context override in datablock oeprator
+    # TODO: hide extra settings for these datablock types if there is a target and context override in datablock operator
     # target object
     # target mesh
     # target curve
@@ -365,7 +364,6 @@ class datablock:
     # TODO: pin id, name stack needs to override but not replace pin state if it is called from name stack
         # this should work with the individual states too such as modifier, if a modifier is pinned after being called from name stack, unless the operator is called again from the stack only show the last pin state, otherwise show the new datablock target and maintain the old pin state
         #XXX: add pin history navigation
-    # TODO: Create a properties pop-up that behaves the same as the properties window place it on the search row, right after filters
 
 
     def __init__(self, operator, context):
@@ -754,7 +752,6 @@ class datablock:
     #####################
 
     ## helpers ##
-
     @staticmethod
     def _draw_keyframing_setting(context, layout, ks, ksp, label, toggle_prop, prop, userpref_fallback=None):
         if ksp:
@@ -787,7 +784,6 @@ class datablock:
             subrow.prop(item, prop, text=label)
         else:
             subrow.prop(owner, propname, text=label)
-
 
     @staticmethod
     def panel_node_draw(layout, id_data, output_type, input_name):
@@ -1693,6 +1689,7 @@ class datablock:
             sub.active = curve.bevel_object is not None
             sub.prop(curve, 'use_fill_caps')
 
+
     def data_draw_pathanim(self, context):
         layout = self.layout
 
@@ -2201,7 +2198,7 @@ class datablock:
     @staticmethod
     def data_poll_normals(context):
         return context.active_object.type == 'MESH' and context.active_object.data
-    
+
     @staticmethod
     def data_poll_texture_space(context):
         return context.active_object.type == 'MESH' and context.active_object.data
@@ -2243,12 +2240,10 @@ class batchname:
 
         getattr(self, option.mode.lower())(operator, context, option, column)
 
-
     @staticmethod
     def set_height(column, separators):
         for _ in range(0, separators):
             column.separator()
-
 
     @staticmethod
     def split_row(column, offset=0.0):
@@ -2257,7 +2252,6 @@ class batchname:
         split = row.split(align=True, percentage=0.275+offset)
 
         return split
-
 
     @staticmethod
     def datablock_buttons(category, option, layout, use_label=True):
@@ -2280,7 +2274,6 @@ class batchname:
             else:
                 row.prop(option, target, text=target.title(), toggle=True)
 
-
     @staticmethod
     def search_specials(operator, context):
 
@@ -2296,7 +2289,6 @@ class batchname:
         layout.prop(option, 'case_sensitive')
         layout.prop(option, 're')
 
-
     @staticmethod
     def move_search_specials(operator, context):
 
@@ -2308,7 +2300,6 @@ class batchname:
         layout.prop(option, 'move_case_sensitive')
         layout.prop(option, 'move_re')
 
-
     @staticmethod
     def swap_search_specials(operator, context):
 
@@ -2319,8 +2310,6 @@ class batchname:
 
         layout.prop(option, 'swap_case_sensitive')
         layout.prop(option, 'swap_re')
-
-
 
     @staticmethod
     def operation_specials(operator, context):
@@ -2361,7 +2350,6 @@ class batchname:
 
             mode = getattr(option, operation_mode).lower()
             getattr(self, mode)(option, row)
-
 
         @staticmethod
         def search_prop(option, row, prop):
@@ -2449,12 +2437,10 @@ class batchname:
             self.search_prop(option, row, 'before')
             self.search_specials(row)
 
-
         @staticmethod
         def insert_prop(option, row):
 
             row.prop(option, 'insert', text='', icon='ZOOMIN')
-
 
         @staticmethod
         def separator_prop(option, row):
@@ -2531,12 +2517,10 @@ class batchname:
                 def __init__(self, operator, context, option, layout):
                     getattr(self, context.space_data.context.lower())(operator, context, option, layout)
 
-
                 @staticmethod
                 def render(operator, context, option, layout):
 
                     layout.label(text='Nothing specific in the properties render context to target')
-
 
                 @staticmethod
                 def render_layer(operator, context, option, layout):
@@ -2546,14 +2530,12 @@ class batchname:
                     # views
                     # freestyle
 
-
                 @staticmethod
                 def scene(operator, context, option, layout):
 
                     layout.label(text='Properties scene context is not yet implemented')
                     # keying sets
                     # custom properties
-
 
                 @staticmethod
                 def world(operator, context, option, layout):
@@ -2562,7 +2544,6 @@ class batchname:
                     # worlds
                     # custom properties
 
-
                 @staticmethod
                 def object(operator, context, option, layout):
 
@@ -2570,20 +2551,17 @@ class batchname:
                     # groups
                     # custom properties
 
-
                 @staticmethod
                 def constraint(operator, context, option, layout):
 
                     layout.label(text='Properties constraint context is not yet implemented')
                     # constraints
 
-
                 @staticmethod
                 def modifier(operator, context, option, layout):
 
                     layout.label(text='Properties modifier context is not yet implemented')
                     # modifiers
-
 
                 @staticmethod
                 def data(operator, context, option, layout):
@@ -2599,20 +2577,17 @@ class batchname:
                     # font * for text
                     # custom properties
 
-
                 @staticmethod
                 def bone(operator, context, option, layout):
 
                     layout.label(text='Properties bone context is not yet implemented')
                     # custom properties
 
-
                 @staticmethod
                 def bone_constraint(operator, context, option, layout):
 
                     layout.label(text='Properties bone constraint context is not yet implemented')
                     # constraints
-
 
                 @staticmethod
                 def material(operator, context, option, layout):
@@ -2621,14 +2596,12 @@ class batchname:
                     # materials
                     # custom properties
 
-
                 @staticmethod
                 def texture(operator, context, option, layout):
 
                     layout.label(text='Properties texture context is not yet implemented')
                     # image
                     # custom properties
-
 
                 @staticmethod
                 def particle(operator, context, option, layout):
@@ -2639,7 +2612,6 @@ class batchname:
                     # textures
                     # custom properties
 
-
                 @staticmethod
                 def physics(operator, context, option, layout):
 
@@ -2649,12 +2621,10 @@ class batchname:
                     # dynamic paint canvas
                     # soft body cache
 
-
             @staticmethod
             def console(operator, context, option, layout):
 
                 layout.label(text='Nothing specific in the console to target')
-
 
             @staticmethod
             def text_editor(operator, context, option, layout):
@@ -2669,7 +2639,6 @@ class batchname:
                 def __init__(self, operator, context, option, layout):
                     getattr(self, context.space_data.mode.lower())(operator, context, option, layout)
 
-
                 @staticmethod
                 def dopesheet(operator, context, option, layout):
 
@@ -2678,20 +2647,17 @@ class batchname:
                     # group
                     layout.label(text='Dopesheet\'s dopesheet mode is not yet supported')
 
-
                 @staticmethod
                 def action(operator, context, option, layout):
 
                     # group
                     layout.label(text='Dopesheet\'s action mode is not yet supported')
 
-
                 @staticmethod
                 def shapekey(operator, context, option, layout):
 
                     # group
                     layout.label(text='Dopesheet\'s shapekey mode is not yet supported')
-
 
                 @staticmethod
                 def gpencil(operator, context, option, layout):
@@ -2700,14 +2666,12 @@ class batchname:
                     # layers
                     layout.label(text='Dopesheet\'s grease pencil mode is not yet supported')
 
-
                 @staticmethod
                 def mask(operator, context, option, layout):
 
                     # mask
                     # layer
                     layout.label(text='Dopesheet\'s mask file mode is not yet supported')
-
 
                 @staticmethod
                 def cachefile(operator, context, option, layout):
@@ -2721,7 +2685,6 @@ class batchname:
                 def __init__(self, operator, context, option, layout):
                     getattr(self, context.space_data.mode.lower())(operator, context, option, layout)
 
-
                 @staticmethod
                 def fcurves(operator, context, option, layout):
 
@@ -2730,14 +2693,12 @@ class batchname:
                     # action groups
                     layout.label(text='Graph editor\'s fcurve mode is not yet implemented')
 
-
                 @staticmethod
                 def drivers(operator, context, option, layout):
 
                     # object
                     # driver variables
                     layout.label(text='Graph editor\'s driver mode is not yet implemented')
-
 
             @staticmethod
             def view_3d(operator, context, option, layout):
@@ -2756,7 +2717,6 @@ class batchname:
                 def __init__(self, operator, context, option, layout):
                     getattr(self, context.space_data.mode.lower())(operator, context, option, layout)
 
-
                 @staticmethod
                 def view(operator, context, option, layout):
 
@@ -2767,7 +2727,6 @@ class batchname:
                     # gp pallete
                     # gp brushes
                     layout.label(text='Image editor\'s view mode is not yet implemented')
-
 
                 @staticmethod
                 def paint(operator, context, option, layout):
@@ -2782,7 +2741,6 @@ class batchname:
                     # gp brushes
                     layout.label(text='Image editor\'s paint mode is not yet implemented')
 
-
                 @staticmethod
                 def mask(operator, context, option, layout):
 
@@ -2794,7 +2752,6 @@ class batchname:
                     # gp pallete
                     # gp brushes
                     layout.label(text='Image editor\'s mask mode is not yet implemented')
-
 
             @staticmethod
             def node_editor(operator, context, option, layout):
@@ -2809,13 +2766,11 @@ class batchname:
                 # scene
                 # node input output?
 
-
             @staticmethod
             def timeline(operator, context, option, layout):
 
                 layout.label(text='Timeline is not yet implemented')
                 # markers
-
 
             @staticmethod
             def nla_editor(operator, context, option, layout):
@@ -2826,7 +2781,6 @@ class batchname:
                 # tracks
                 # strips
 
-
             @staticmethod
             def sequence_editor(operator, context, option, layout):
 
@@ -2836,7 +2790,6 @@ class batchname:
                 # grease pencil
                 # custom properties
 
-
             @staticmethod
             def clip_editor(operator, context, option, layout):
 
@@ -2845,7 +2798,6 @@ class batchname:
                 # mask layers
                 # grease pencil
 
-
             @staticmethod
             def logic_editor(operator, context, option, layout):
 
@@ -2853,24 +2805,20 @@ class batchname:
                 # logic bricks
                 # game properties
 
-
             @staticmethod
             def outliner(operator, context, option, layout):
 
                 layout.label(text='Outliner is not yet implemented')
-
 
             @staticmethod
             def user_preferences(operator, context, option, layout):
 
                 layout.label(text='Nothing specific in user preferences to target')
 
-
             @staticmethod
             def info(operator, context, option, layout):
 
                 layout.label(text='Nothing specific in info to target')
-
 
             @staticmethod
             def file_browser(operator, context, option, layout):
@@ -2981,7 +2929,6 @@ class batchname:
 
                 batchname.mode_row(option, column, custom_mode='swap_to', swap=True)
 
-
             @staticmethod
             def transfer(option, column):
 
@@ -3002,11 +2949,9 @@ class batchname:
 
             getattr(self, option.sort_mode.lower())(option, column)
 
-
         @staticmethod
         def name_slice(option, column):
             pass
-
 
         @staticmethod
         def fallback_mode_prop(option, column):
@@ -3016,7 +2961,6 @@ class batchname:
             row = column.row(align=True)
             row.prop(option, 'display_options', text='', icon='SETTINGS')
             row.prop(option, 'fallback_mode', expand=True)
-
 
         @staticmethod
         def none(option, column):
@@ -3114,7 +3058,6 @@ class batchname:
 
             getattr(self, option.count_mode.lower())(operator, context, option, column)
 
-
         @staticmethod
         def position_row(operator, context, option, column):
 
@@ -3139,7 +3082,6 @@ class batchname:
             row.prop(option, 'step')
 
             self.position_row(operator, context, option, column)
-
 
         @staticmethod
         def none(operator, context, option, column):
@@ -3170,7 +3112,6 @@ class batchname:
 
             self.common(operator, context, option, column)
 
-
     @staticmethod
     def preview(operator, context, options, column):
 
@@ -3189,26 +3130,21 @@ class batchname:
 
             getattr(self, option.options_mode.lower())(operator, context, option, column)
 
-
         @staticmethod
         def presets(operator, context, option, column):
             column.label(text='Presets are not yet implemented')
-
 
         @staticmethod
         def restore(operator, context, option, column):
             column.label(text='Restore points are not yet implemented')
 
-
         @staticmethod
         def importing(operator, context, option, column):
             column.label(text='Importing is not yet implemented')
 
-
         @staticmethod
         def exporting(operator, context, option, column):
             column.label(text='Exporting is not yet implemented')
-
 
         @staticmethod
         def preferences(operator, context, option, column):
@@ -3326,5 +3262,3 @@ class preferences:
         row = box.row()
         row.prop(addon, 'update_display_menu')
         row.prop(addon, 'update_display_stack')
-
-
