@@ -5,8 +5,8 @@ from bpy.props import StringProperty, BoolProperty, EnumProperty
 
 
 from . import interface
-from .utilities import get, update
-from .config import defaults
+from . utilities import update, namestack, batchname, preferences
+from . config import defaults
 
 
 class clear_find(Operator):
@@ -17,7 +17,7 @@ class clear_find(Operator):
 
     def execute(self, context):
 
-        get.namestack.options(context).find = ''
+        namestack.options(context).find = ''
 
         return {'FINISHED'}
 
@@ -30,7 +30,7 @@ class clear_replace(Operator):
 
     def execute(self, context):
 
-        get.namestack.options(context).replace = ''
+        namestack.options(context).replace = ''
 
         return {'FINISHED'}
 
@@ -51,7 +51,7 @@ class options(Operator):
 
     def invoke(self, context, event):
 
-        context.window_manager.invoke_popup(self, width=get.preferences(context).filter_popup_width)
+        context.window_manager.invoke_popup(self, width=preferences(context).filter_popup_width)
 
         return {'RUNNING_MODAL'}
 
@@ -63,7 +63,7 @@ class options(Operator):
 class datablock(Operator):
     bl_idname = 'namestack.datablock'
     bl_label = 'Datablock Settings'
-    bl_description = 'Adjust datablock settings\n  Ctrl \N{Rightwards Arrow} Display pop-up\n  Alt \N{Rightwards Arrow} Center view on selected\n  Shift \N{Rightwards Arrow} Add/Remove selection'
+    bl_description = 'Adjust datablock settings\n  Ctrl - Display pop-up\n  Alt - Center view on selected\n  Shift - Add/Remove selection'
     bl_options = {'REGISTER', 'UNDO'}
 
     click_through = BoolProperty(
@@ -111,102 +111,18 @@ class datablock(Operator):
             if self.click_through:
                 self.click_through = False
                 if event.ctrl:
-                    context.window_manager.invoke_popup(self, width=get.preferences(context).datablock_popup_width)
+                    context.window_manager.invoke_popup(self, width=preferences(context).datablock_popup_width)
                     return {'RUNNING_MODAL'}
                 else:
                     return {'FINISHED'}
             elif event.ctrl:
                 return {'FINISHED'}
             else:
-                context.window_manager.invoke_popup(self, width=get.preferences(context).datablock_popup_width)
+                context.window_manager.invoke_popup(self, width=preferences(context).datablock_popup_width)
                 return {'RUNNING_MODAL'}
 
         else:
-            context.window_manager.invoke_popup(self, width=get.preferences(context).datablock_popup_width)
-        return {'RUNNING_MODAL'}
-
-
-    def execute(self, context):
-        return {'FINISHED'}
-
-
-class info_update(Operator):
-    bl_idname = 'namestack.info_update'
-    bl_label = 'Update Info'
-    bl_description = 'Get Latest update information'
-    bl_options = {'INTERNAL'}
-
-
-    def check(self, context):
-        return True
-
-
-    def draw(self, context):
-
-        layout = self.layout
-
-        column = layout.column(align=True)
-        row = column.row()
-
-        if get.preferences(context).update_ready:
-
-            row.alignment = 'CENTER'
-            row.label(text='New Update! ({})'.format(get.version.remote_string()))
-
-            for line in get.version.remote_info().split('\n'):
-                row = column.row()
-                row.scale_y = 0.6
-                row.label(line)
-
-            row = column.row()
-            row.scale_y = 1.5
-            row.operator('wm.name_stack_update_addon', text='Update')
-
-        elif not update.check.connection():
-
-            row.alignment = 'CENTER'
-            row.label(text='Unable to connect to github', icon='ERROR')
-
-
-        else:
-
-            row.alignment = 'CENTER'
-            row.label(text='Your version is up to date!')
-
-
-    def invoke(self, context, event):
-        context.window_manager.invoke_popup(self, width=get.preferences(context).batchname_popup_width)
-        return {'RUNNING_MODAL'}
-
-
-    def execute(self, context):
-        return {'FINISHED'}
-
-
-class confirm_update(Operator):
-    bl_idname = 'namestack.confirm_update'
-    bl_label = ''
-    bl_description = ''
-    bl_options = {'INTERNAL'}
-
-
-    def check(self, context):
-        return True
-
-
-    def draw(self, context):
-
-        layout = self.layout
-
-        layout.separator()
-        row = layout.row()
-        row.alignment = 'CENTER'
-        row.label(text='Successfully updated')
-        layout.separator()
-
-
-    def invoke(self, context, event):
-        context.window_manager.invoke_popup(self, width=get.preferences(context).batchname_popup_width)
+            context.window_manager.invoke_popup(self, width=preferences(context).datablock_popup_width)
         return {'RUNNING_MODAL'}
 
 
@@ -232,7 +148,7 @@ class batchname(Operator):
 
         self.area_type = context.area.type
 
-        context.window_manager.invoke_props_dialog(self, width=get.preferences(context).batchname_popup_width)
+        context.window_manager.invoke_props_dialog(self, width=preferences(context).batchname_popup_width)
 
         return {'RUNNING_MODAL'}
 
@@ -250,18 +166,18 @@ class add_operation(Operator):
 
     def execute(self, context):
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
 
         if naming.operation_options:
             prior_operation = naming.operation_options[naming.active_index]
             active_index = len(naming.operation_options) - 1
 
-            prior_operation.name = get.batchname.operation_name(prior_operation)
-            naming.operation_options.add().name = get.batchname.operation_name(prior_operation)
+            prior_operation.name = batchname.operation_name(prior_operation)
+            naming.operation_options.add().name = batchname.operation_name(prior_operation)
 
             active_index += 1
 
-            if get.preferences(context).use_last:
+            if preferences(context).use_last:
                 options = [option for option in defaults['batchname']['operation']]
 
                 for option in options:
@@ -282,7 +198,7 @@ class add_operation(Operator):
 class remove_operation(Operator):
     bl_idname = 'namestack.batchname_remove_operation'
     bl_label = 'Remove'
-    bl_description = 'Remove active name operation from the list\n  Alt \N{Rightwards Arrow} to clear all)'
+    bl_description = 'Remove active name operation from the list\n  Alt - to clear all)'
     bl_options = {'INTERNAL'}
 
     all = BoolProperty()
@@ -298,7 +214,7 @@ class remove_operation(Operator):
 
     def execute(self, context):
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
 
         if len(naming.operation_options):
             if not self.all:
@@ -319,10 +235,10 @@ class rename_operation(Operator):
 
     def execute(self, context):
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
         operation = naming.operation_options[naming.active_index]
 
-        operation.name = get.batchname.operation_name(operation)
+        operation.name = batchname.operation_name(operation)
 
         return {'FINISHED'}
 
@@ -336,10 +252,10 @@ class rename_all_operations(Operator):
 
     def execute(self, context):
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
 
         for operation in naming.operation_options:
-            operation.name = get.batchname.operation_name(operation)
+            operation.name = batchname.operation_name(operation)
         return {'FINISHED'}
 
 
@@ -354,7 +270,7 @@ class move_operation(Operator):
 
     def execute(self, context):
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
 
         if self.up:
             naming.operation_options.move(naming.active_index, naming.active_index - 1)

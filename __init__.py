@@ -30,8 +30,9 @@ import bpy
 from bpy.props import PointerProperty
 from bpy.utils import register_module, unregister_module, unregister_class
 
-from .addon import menu, operator, panel, preferences, properties
-from .addon.utilities import get, update
+from . addon import menu, operator, panel, preferences
+from . properties import options
+from . addon.utilities import preferences, update
 
 
 def register():
@@ -40,14 +41,11 @@ def register():
     context = bpy.context
     update.handlers(context)
 
-    if get.preferences(context).update_check:
-        update.check(context, bl_info)
-
-    if get.preferences(context).remove_item_panel:
+    if preferences(context).remove_item_panel:
         update.item_panel_poll()
 
     bpy.types.WindowManager.namestack = PointerProperty(
-        type = properties.namestack_main,
+        type = options,
         name = 'Name Stack Addon',
         description = 'Storage location for name stack addon options')
 

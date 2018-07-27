@@ -3,7 +3,7 @@ import bpy
 from bpy.types import Panel
 
 from . import interface
-from .utilities import get
+from . utilities import preferences
 
 
 class tool_shelf(Panel):
@@ -15,7 +15,7 @@ class tool_shelf(Panel):
 
     @classmethod
     def poll(cls, context):
-        return get.preferences(context).location == 'TOOLS'
+        return preferences(context).location == 'TOOLS'
 
 
     def draw(self, context):
@@ -30,7 +30,7 @@ class property_shelf(Panel):
 
     @classmethod
     def poll(cls, context):
-        return get.preferences(context).location == 'UI'
+        return preferences(context).location == 'UI'
 
 
     def draw(self, context):

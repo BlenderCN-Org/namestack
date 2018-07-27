@@ -3,7 +3,6 @@ import bpy
 from bpy.types import Menu
 
 from . import interface
-from .utilities import get
 
 
 class specials(Menu):

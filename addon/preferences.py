@@ -4,9 +4,8 @@ from bpy.types import PropertyGroup, AddonPreferences
 from bpy.props import *
 
 from . import interface
-
-from .config import defaults
-from .utilities import get, update
+from . config import defaults
+from . utilities import update, datablock, 
 
 
 class panel_options(PropertyGroup):
@@ -39,7 +38,7 @@ class datablock(PropertyGroup):
     context = EnumProperty(
         name = 'Context',
         description = 'Type of active data to display and edit',
-        items = get.datablock.contexts)
+        items = datablock.contexts)
 
     render = CollectionProperty(
         name = 'Render',

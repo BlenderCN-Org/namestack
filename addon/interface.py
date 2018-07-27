@@ -5,7 +5,7 @@ import rna_keymap_ui
 from bpy.types import Curve, SurfaceCurve, TextCurve
 from cycles.ui import find_node, find_node_input, use_branched_path, use_sample_all_lights, use_cpu
 
-from .utilities import get, update
+from .utilities import update, namestack, batchname, datablock, icon, preferences
 from .config import remote
 
 
@@ -15,14 +15,14 @@ class namestack:
     def __init__(self, stack, context):
         self.layout = stack.layout
 
-        if get.preferences(context).update_display_stack and get.preferences(context).update_ready:
+        if preferences(context).update_display_stack and preferences(context).update_ready:
             row = self.layout.row()
             row.alignment = 'CENTER'
             row.scale_y = 2
             row.operator('namestack.update_info', text='Update Available!', icon='ERROR', emboss=False)
 
 
-        self.option = get.namestack.options(context)
+        self.option = namestack.options(context)
         self.find_and_replace(context)
         self.layout.separator()
         self.stack(context)
@@ -53,7 +53,7 @@ class namestack:
 
 
     def stack(self, context):
-        self.stack = get.namestack.stack(context)
+        self.stack = namestack.stack(context)
 
         # TODO: add display limit
         if self.stack:
@@ -85,7 +85,7 @@ class namestack:
 
 
     def specials(stack, context):
-        option = get.namestack.options(context)
+        option = namestack.options(context)
         layout = stack.layout
 
         layout.label(text='Find & Replace')
@@ -101,34 +101,29 @@ class namestack:
 
         layout.separator()
 
-        layout.operator('namestack.batchname', text='Transfer Names')
-        layout.operator('namestack.batchname', text='Count Names')
+        #layout.operator('namestack.batchname', text='Transfer Names')
+        #layout.operator('namestack.batchname', text='Count Names')
 
-        layout.separator()
+        #layout.separator()
 
         layout.operator('namestack.batchname', icon='SORTALPHA')
-
-        if get.preferences(context).update_display_menu and get.preferences(context).update_ready:
-            layout.separator()
-
-            layout.operator('namestack.info_update', text='Update Available!', icon='ERROR')
 
 
     class stack_object:
 
 
         def __init__(self, stack, context, object):
-            self.option = get.namestack.options(context).filter_options['options']
+            self.option = namestack.options(context).filter_options['options']
             self.context = context
             self.object = object
 
             column = stack.layout.column(align=True)
 
-            self.row(stack.stack['objects'], column, self.object, get.icon.object(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
+            self.row(stack.stack['objects'], column, self.object, icon.object(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
 
             for type in stack.stack['objects'][object.name]['types']:
                 getattr(self, type)(stack.stack['objects'][object.name][type], column)
-            for _ in range(get.preferences(self.context).separators):
+            for _ in range(preferences(self.context).separators):
                 stack.layout.separator()
 
 
@@ -143,58 +138,58 @@ class namestack:
                 sub.active = active
 
                 operator = sub.operator('namestack.datablock', text='', icon=icon, emboss=emboss)
-                operator.click_through = get.preferences(self.context).click_through
+                operator.click_through = preferences(self.context).click_through
                 operator.context_override = ''
                 operator.object_name = self.object.name
                 operator.target_name = getattr(datablock, name_type)
-                operator.identifier = get.identifier(datablock)
+                operator.identifier = identifier(datablock)
 
                 row.prop(datablock, name_type, text='')
 
 
         def groups(self, location, column):
             for group in location['datablocks']:
-                self.row(location, column, group, get.icon('groups'))
+                self.row(location, column, group, icon('groups'))
 
 
         def grease_pencils(self, location, column):
 
-            self.row(location, column, location['datablocks'][0], get.icon('grease_pencils'))
+            self.row(location, column, location['datablocks'][0], icon('grease_pencils'))
 
             for layer in location[location['datablocks'][0].name]['grease_pencil_layers']['datablocks']:
-                self.row(location[location['datablocks'][0].name]['grease_pencil_layers'], column, layer, get.icon('grease_pencil_layers'), name_type='info')
+                self.row(location[location['datablocks'][0].name]['grease_pencil_layers'], column, layer, icon('grease_pencil_layers'), name_type='info')
 
 
         def actions(self, location, column):
-            self.row(location, column, location['datablocks'][0], get.icon('actions'))
+            self.row(location, column, location['datablocks'][0], icon('actions'))
 
 
         def constraints(self, location, column):
             for constraint in location['datablocks']:
-                self.row(location, column, constraint, get.icon('constraints'))
+                self.row(location, column, constraint, icon('constraints'))
 
 
         def modifiers(self, location, column):
 
             for modifier in location['datablocks']:
-                self.row(location, column, modifier, get.icon.modifier(modifier))
+                self.row(location, column, modifier, icon.modifier(modifier))
 
                 if 'particle_system' in location[modifier.name]:
-                    self.row(location[modifier.name]['particle_system'], column, location[modifier.name]['particle_system'][modifier.particle_system.name]['datablock'], get.icon.subtype('particle_system'))
+                    self.row(location[modifier.name]['particle_system'], column, location[modifier.name]['particle_system'][modifier.particle_system.name]['datablock'], icon.subtype('particle_system'))
                     self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'], column, location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['datablock'], 'DOT')
 
                     if 'textures' in location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]:
                         for texture in location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures']['datablocks']:
-                            self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'], column,  location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'][texture.name]['datablock'], get.icon('textures'))
+                            self.row(location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'], column,  location[modifier.name]['particle_system'][modifier.particle_system.name]['particle_settings'][modifier.particle_system.settings.name]['textures'][texture.name]['datablock'], icon('textures'))
 
 
         def object_data(self, location, column):
-            self.row(location, column, location['datablocks'][0], get.icon.object_data(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
+            self.row(location, column, location['datablocks'][0], icon.object_data(self.object), emboss=True if self.object.select or self.object == self.context.active_object else False, active=not (self.object == self.context.scene.objects.active and not self.object.select))
 
 
         def bone_groups(self, location, column):
             for group in location['datablocks']:
-                self.row(location, column, group, get.icon('bone_groups'))
+                self.row(location, column, group, icon('bone_groups'))
 
 
         def bones(self, location, column): # TODO: implement bones for all armatures in namestack
@@ -206,7 +201,7 @@ class namestack:
                 active_bone = self.context.active_bone if self.context.mode == 'EDIT_ARMATURE' else self.context.active_pose_bone
                 bone_selected = bone.select if self.context.mode == 'EDIT_ARMATURE' else bone.bone.select
 
-                self.row(location, column, bone, get.icon('bones'), emboss=True if bone_selected or bone == active_bone else False, active=not (bone == active_bone and not bone_selected))
+                self.row(location, column, bone, icon('bones'), emboss=True if bone_selected or bone == active_bone else False, active=not (bone == active_bone and not bone_selected))
 
                 if 'bone_constraints' in location[bone.name]:
                     self.constraints(location[bone.name]['bone_constraints'], column)
@@ -214,33 +209,33 @@ class namestack:
 
         def shapekeys(self, location, column):
             for shapekey in location['datablocks']:
-                self.row(location, column, shapekey, get.icon('shapekeys'))
+                self.row(location, column, shapekey, icon('shapekeys'))
 
 
         def vertex_groups(self, location, column):
             for vertex_group in location['datablocks']:
-                self.row(location, column, vertex_group, get.icon('vertex_groups'))
+                self.row(location, column, vertex_group, icon('vertex_groups'))
 
 
         def uv_maps(self, location, column):
             for uv_map in location['datablocks']:
-                self.row(location, column, uv_map, get.icon('uv_maps'))
+                self.row(location, column, uv_map, icon('uv_maps'))
 
 
         def vertex_colors(self, location, column):
             for vertex_color in location['datablocks']:
-                self.row(location, column, vertex_color, get.icon('vertex_colors'))
+                self.row(location, column, vertex_color, icon('vertex_colors'))
 
 
         def materials(self, location, column):
 
             for material in location['datablocks']:
-                self.row(location, column, material, get.icon('materials'))
+                self.row(location, column, material, icon('materials'))
 
                 if material:
                     if 'textures' in location[material.name]:
                         for texture in location[material.name]['textures']['datablocks']:
-                            self.row(location[material.name]['textures'], column, texture, get.icon('textures'))
+                            self.row(location[material.name]['textures'], column, texture, icon('textures'))
 
 
     class options:
@@ -248,7 +243,7 @@ class namestack:
 
         def __init__(self, operator, context):
 
-            self.option = get.namestack.options(context).filter_options['options']
+            self.option = namestack.options(context).filter_options['options']
 
             split = operator.layout.column().split(percentage=0.15)
             column = split.column()
@@ -292,38 +287,38 @@ class namestack:
             column = split.column(align=True)
             row = column.row(align=True)
             row.scale_x = 2
-            row.prop(self.option, 'groups', text='', icon=get.icon('groups'))
-            row.prop(self.option, 'grease_pencils', text='', icon=get.icon('grease_pencils'))
-            row.prop(self.option, 'actions', text='', icon=get.icon('actions'))
-            row.prop(self.option, 'constraints', text='', icon=get.icon('constraints'))
-            row.prop(self.option, 'modifiers', text='', icon=get.icon('modifiers'))
-            row.prop(self.option, 'bones', text='', icon=get.icon('bones'))
-            row.prop(self.option, 'bone_groups', text='', icon=get.icon('bone_groups'))
-            row.prop(self.option, 'bone_constraints', text='', icon=get.icon('bone_constraints'))
+            row.prop(self.option, 'groups', text='', icon=icon('groups'))
+            row.prop(self.option, 'grease_pencils', text='', icon=icon('grease_pencils'))
+            row.prop(self.option, 'actions', text='', icon=icon('actions'))
+            row.prop(self.option, 'constraints', text='', icon=icon('constraints'))
+            row.prop(self.option, 'modifiers', text='', icon=icon('modifiers'))
+            row.prop(self.option, 'bones', text='', icon=icon('bones'))
+            row.prop(self.option, 'bone_groups', text='', icon=icon('bone_groups'))
+            row.prop(self.option, 'bone_constraints', text='', icon=icon('bone_constraints'))
 
             row = column.row(align=True)
             row.scale_x = 2
-            row.prop(self.option, 'shapekeys', text='', icon=get.icon('shapekeys'))
-            row.prop(self.option, 'vertex_groups', text='', icon=get.icon('vertex_groups'))
-            row.prop(self.option, 'uv_maps', text='', icon=get.icon('uv_maps'))
-            row.prop(self.option, 'vertex_colors', text='', icon=get.icon('vertex_colors'))
-            row.prop(self.option, 'particle_systems', text='', icon=get.icon('particle_systems'))
-            row.prop(self.option, 'materials', text='', icon=get.icon('materials'))
-            row.prop(self.option, 'textures', text='', icon=get.icon('textures'))
-            row.prop(self.option, 'images', text='', icon=get.icon('images'))
+            row.prop(self.option, 'shapekeys', text='', icon=icon('shapekeys'))
+            row.prop(self.option, 'vertex_groups', text='', icon=icon('vertex_groups'))
+            row.prop(self.option, 'uv_maps', text='', icon=icon('uv_maps'))
+            row.prop(self.option, 'vertex_colors', text='', icon=icon('vertex_colors'))
+            row.prop(self.option, 'particle_systems', text='', icon=icon('particle_systems'))
+            row.prop(self.option, 'materials', text='', icon=icon('materials'))
+            row.prop(self.option, 'textures', text='', icon=icon('textures'))
+            row.prop(self.option, 'images', text='', icon=icon('images'))
 
 
         def extra_options(self, context):
 
             row = self.split.row(align=True)
-            row.prop(get.preferences(context), 'pin_active', toggle=True)
-            row.prop(get.preferences(context), 'click_through', toggle=True)
+            row.prop(preferences(context), 'pin_active', toggle=True)
+            row.prop(preferences(context), 'click_through', toggle=True)
 
             row = self.split.row(align=True)
-            row.prop(get.preferences(context), 'location', expand=True)
+            row.prop(preferences(context), 'location', expand=True)
 
             row = self.split.row()
-            row.prop(get.preferences(context), 'filter_popup_width', text='Pop-up Width')
+            row.prop(preferences(context), 'filter_popup_width', text='Pop-up Width')
 
 
 class datablock:
@@ -470,7 +465,7 @@ class datablock:
 
         layout = operator.layout
 
-        self.option = get.datablock.options(context)
+        self.option = datablock.options(context)
 
         row = layout.row(align=True)
         row.prop(self.option, 'context', text='', expand=True)
@@ -2226,7 +2221,7 @@ class batchname:
 
     def __init__(self, operator, context, specials=False):
 
-        option = get.batchname.options(context)
+        option = batchname.options(context)
 
         layout = operator.layout
         column = layout.column()
@@ -2267,24 +2262,24 @@ class batchname:
             row.prop(option, 'toggle_objects', text='', icon='RADIOBUT_OFF' if not option.toggle_objects else 'RADIOBUT_ON')
         elif category == 'Objects Data':
             row.prop(option, 'toggle_objects_data', text='', icon='RADIOBUT_OFF' if not option.toggle_objects_data else 'RADIOBUT_ON')
-        for target in get.batchname.catagories[category]:
-            if target not in {'line_sets', 'sensors', 'controllers', 'actuators'}:row.prop(option, target, text='', icon=get.icon(target))
+        for target in batchname.catagories[category]:
+            if target not in {'line_sets', 'sensors', 'controllers', 'actuators'}:row.prop(option, target, text='', icon=icon(target))
             elif target == 'line_sets':
                 row.prop(option, target, text='Line Sets', toggle=True)
             else:
-                row.prop(option, target, text=target.title(), toggle=True)
+                row.prop(option, target, text=tartitle(), toggle=True)
 
     @staticmethod
     def search_specials(operator, context):
 
         layout = operator.layout
 
-        if get.batchname.options(context).mode == 'NAME':
-            naming = get.batchname.options(context).name_options['options']
+        if batchname.options(context).mode == 'NAME':
+            naming = batchname.options(context).name_options['options']
             option = naming.operation_options[naming.active_index]
 
         else:
-            option = get.batchname.options(context).sort_options['options']
+            option = batchname.options(context).sort_options['options']
 
         layout.prop(option, 'case_sensitive')
         layout.prop(option, 're')
@@ -2294,7 +2289,7 @@ class batchname:
 
         layout = operator.layout
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
         option = naming.operation_options[naming.active_index]
 
         layout.prop(option, 'move_case_sensitive')
@@ -2305,7 +2300,7 @@ class batchname:
 
         layout = operator.layout
 
-        naming = get.batchname.options(context).name_options['options']
+        naming = batchname.options(context).name_options['options']
         option = naming.operation_options[naming.active_index]
 
         layout.prop(option, 'swap_case_sensitive')
@@ -2316,8 +2311,8 @@ class batchname:
 
         layout = operator.layout
 
-        layout.prop(get.preferences(context), 'use_last')
-        layout.prop(get.preferences(context), 'auto_name_operations')
+        layout.prop(preferences(context), 'use_last')
+        layout.prop(preferences(context), 'auto_name_operations')
 
         layout.operator('namestack.batchname_rename_operation')
         layout.operator('namestack.batchname_rename_all_operations')
@@ -3150,17 +3145,17 @@ class batchname:
         def preferences(operator, context, option, column):
 
             row = column.row()
-            row.prop(get.preferences(context), 'use_last')
-            row.prop(get.preferences(context), 'auto_name_operations')
+            row.prop(preferences(context), 'use_last')
+            row.prop(preferences(context), 'auto_name_operations')
 
-            column.prop(get.preferences(context), 'batchname_popup_width')
+            column.prop(preferences(context), 'batchname_popup_width')
 
 
 class preferences:
 
 
     def __init__(self, addon, context):
-        addon.preference = get.preferences(context)
+        addon.preference = preferences(context)
 
         row = addon.layout.row()
         # row.scale_y = 2
