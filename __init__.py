@@ -31,8 +31,9 @@ from bpy.props import PointerProperty
 from bpy.utils import register_module, unregister_module, unregister_class
 
 from . addon import menu, operator, panel, preferences
-from . properties import options
+from . addon.properties import options
 from . addon.utilities import preferences, update
+from . addon.preferences import preference
 
 
 def register():
@@ -41,7 +42,7 @@ def register():
     context = bpy.context
     update.handlers(context)
 
-    if preferences(context).remove_item_panel:
+    if preference.remove_item_panel:
         update.item_panel_poll()
 
     bpy.types.WindowManager.namestack = PointerProperty(
