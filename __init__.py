@@ -1,6 +1,6 @@
 # TODO: implement multi-object bone selection
 '''
-Copyright (C) 2018 Trentin Shaun Frederick
+Copyright (C) 2018 Trentin Frederick
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,13 +16,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 bl_info = {
-    'name': 'Name Stack',
+    'name': 'Name Stack Public Edition',
     'author': 'proxe',
     'version': (0, 9),
     'blender': (2, 79, 0),
     'location': '3D View > Tool (T) | Property (N)',
     'description': 'In panel datablock name stack with additional naming and productivity tools.',
-    'tracker_url': 'https://github.com/proxeIO/name-stack/issues',
+    'tracker_url': 'https://github.com/proxeIO/name-stack-public-edition/issues',
     'category': '3D View'}
 
 import bpy
