@@ -372,7 +372,7 @@ def filters(self, context, layout, panel):
             # operator; batch name
             op = row.operator('wm.batch_name', text='', icon='SORTALPHA')
             op.simple = False
-            op.quickBatch = True
+            op.quickBatch = False
 
         else:
 
@@ -391,12 +391,12 @@ def filters(self, context, layout, panel):
             # operator; batch name
             op = sub.operator('wm.batch_name', text='OK')
             op.simple = True
-            op.quickBatch = True
+            op.quickBatch = False
 
             # operator; batch name
             op = row.operator('wm.batch_name', text='', icon='SORTALPHA')
             op.simple = False
-            op.quickBatch = True
+            op.quickBatch = False
 
     # is dispay names
     if panel.displayNames:
