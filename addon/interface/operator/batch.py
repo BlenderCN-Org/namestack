@@ -329,23 +329,24 @@ class operator(Operator):
             # column
             column = layout.column(align=True)
 
-            # label
-            column.label(text='Game Engine:')
-
-            # row
-            row = column.row(align=True)
-
-            # sensors
-            row.prop(option, 'sensors', text='Sensors', toggle=True)
-
-            # controllers
-            row.prop(option, 'controllers', text='Controllers', toggle=True)
-
-            # actuators
-            row.prop(option, 'actuators', text='Actuators', toggle=True)
 
             # is global
             if option.mode == 'GLOBAL':
+
+                # label
+                column.label(text='Game Engine:')
+
+                # row
+                row = column.row(align=True)
+
+                # sensors
+                row.prop(option, 'sensors', text='Sensors', toggle=True)
+
+                # controllers
+                row.prop(option, 'controllers', text='Controllers', toggle=True)
+
+                # actuators
+                row.prop(option, 'actuators', text='Actuators', toggle=True)
 
                 # column
                 column = layout.column(align=True)
@@ -777,7 +778,7 @@ class operator(Operator):
         if not self.simple:
 
             # size
-            size = 330 if not context.window_manager.BatchShared.largePopups else 460
+            size = 330 if not context.window_manager.BatchShared.largePopups else 700
 
             # props dialog
             context.window_manager.invoke_props_dialog(self, width=size)

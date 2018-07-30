@@ -275,7 +275,7 @@
 # Modified by scripts.function.preferences.generate.main
 defaults = {
     'name panel': {
-        'location': 'TOOLS',
+        'location': 'UI',
         'pin active object': False,
         'pin active bone': True,
         'hide find': False,
@@ -306,11 +306,11 @@ defaults = {
     },
 
     'properties panel': {
-        'location': 'TOOLS'
+        'location': 'UI'
     },
 
     'shared': {
-        'large popups': False,
+        'large popups': True,
         'sort': False,
         'type': 'ALPHABETICAL',
         'axis': 'X',

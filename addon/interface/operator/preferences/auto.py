@@ -39,6 +39,6 @@ class operator(Operator):
         '''
             Invoke the operator panel/menu, control its width.
         '''
-        size = 330 if not context.window_manager.BatchShared.largePopups else 460
+        size = 330 if not context.window_manager.BatchShared.largePopups else 700
         context.window_manager.invoke_props_dialog(self, width=size)
         return {'RUNNING_MODAL'}

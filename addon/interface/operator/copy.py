@@ -94,6 +94,6 @@ class operator(Operator):
 
         self.check(context)
 
-        size = 210 if not context.window_manager.BatchShared.largePopups else 340
+        size = 210 if not context.window_manager.BatchShared.largePopups else 450
         context.window_manager.invoke_props_dialog(self, width=size)
         return {'RUNNING_MODAL'}

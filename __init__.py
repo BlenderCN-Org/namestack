@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 # blender info
 bl_info = {
-    'name': 'Name Stack',
+    'name': 'Name Stack Public Edition',
     'author': 'proxe',
     'version': (0, 8),
     'blender': (2, 78, 0),
@@ -104,7 +104,7 @@ class save(Operator):
                 bpy.utils.unregister_class(properties.toolsProperties)
 
         # imports
-        from .scripts.function.preferences import options
+        from .addon.function.preferences import options
 
         # main
         options.main(context)
