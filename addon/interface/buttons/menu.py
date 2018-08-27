@@ -58,10 +58,10 @@ def menu(self, context):
     layout.prop(option, 'hideFind')
 
     # isnt hide find
-    if not option.hideFind:
-
-        # hide replace
-        layout.prop(option, 'hideReplace')
+    # if not option.hideFind:
+    #
+    #     # hide replace
+    #     layout.prop(option, 'hideReplace')
 
     # isnt hide replace
     if not option.hideFind and not option.hideReplace:
