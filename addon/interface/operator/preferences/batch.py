@@ -17,7 +17,7 @@ class operator(Operator):
     # quick batch
     quickBatch = BoolProperty(
         name = 'Quick Batch',
-        description = 'Quickly batch name datablocks visible in the name panel.',
+        description = 'Quickly batch name datablocks visible in the name panel',
         default = False
     )
 

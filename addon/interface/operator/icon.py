@@ -18,35 +18,35 @@ class operator(Operator):
     # active
     active = BoolProperty(
         name = 'Active',
-        description = 'Make this the active object.',
+        description = 'Make this the active object',
         default = False
     )
 
     # extend
     extend = BoolProperty(
         name = 'Extend',
-        description = 'Keep old selection.',
+        description = 'Keep old selection',
         default = False
     )
 
     # view
     view = BoolProperty(
         name = 'View',
-        description = 'Center the 3D view on the object.',
+        description = 'Center the 3D view on the object',
         default = False
     )
 
     # owner
     owner = StringProperty(
         name = 'Owner',
-        description = 'The owner\'s name of the target datablock.',
+        description = 'The owner\'s name of the target datablock',
         default = ''
     )
 
     # target
     target = StringProperty(
         name = 'Target',
-        description = 'Datablock target\'s name belonging to the owner.',
+        description = 'Datablock target\'s name belonging to the owner',
         default = ''
     )
 

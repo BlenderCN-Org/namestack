@@ -22,21 +22,21 @@ class operator(Operator):
     # simple
     simple = BoolProperty(
         name = 'Simple Batch',
-        description = 'Perform find & replace on names visible in the name panel.',
+        description = 'Perform find & replace on names visible in the name panel',
         default = False
     )
 
     # quick batch
     quickBatch = BoolProperty(
         name = 'Quick Batch',
-        description = 'Quickly batch name datablocks visible in the name panel.',
+        description = 'Quickly batch name datablocks visible in the name panel',
         default = False
     )
 
     # tag
     tag = BoolProperty(
         name = 'Tag',
-        description = 'Generic tag.',
+        description = 'Generic tag',
         default = False
     )
 

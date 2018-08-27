@@ -18,35 +18,35 @@ class reset(Operator):
     # panel
     panel = BoolProperty(
         name = 'Name Panel',
-        description = 'Reset the setting values for the name panel.',
+        description = 'Reset the setting values for the name panel',
         default = False
     )
 
     # auto
     auto = BoolProperty(
         name = 'Auto Name',
-        description = 'Reset the setting values for batch auto name.',
+        description = 'Reset the setting values for batch auto name',
         default = True
     )
 
     # names
     names = BoolProperty(
         name = 'Auto Name \N{Rightwards Arrow} Names',
-        description = 'Reset the setting values for batch auto name \N{Rightwards Arrow} name settings.',
+        description = 'Reset the setting values for batch auto name \N{Rightwards Arrow} name settings',
         default = False
     )
 
     # name
     name = BoolProperty(
         name = 'Batch Name',
-        description = 'Reset the setting values for batch name.',
+        description = 'Reset the setting values for batch name',
         default = True
     )
 
     # copy
     copy = BoolProperty(
         name = 'Batch Name Copy',
-        description = 'Reset the setting values for batch name copy.',
+        description = 'Reset the setting values for batch name copy',
         default = True
     )
 
