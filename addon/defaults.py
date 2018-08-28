@@ -2,8 +2,8 @@
 defaults = {
     'name panel': {
         'location': 'UI',
-        'pin active object': False,
-        'pin active bone': False,
+        'pin active object': True,
+        'pin active bone': True,
         'hide find': False,
         'hide replace': True,
         'filters': False,
