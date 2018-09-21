@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 # blender info
 bl_info = {
-    'name': 'Name Stack Public Edition',
+    'name': 'Name Stack Public',
     'author': 'proxe',
     'version': (0, '8          Commit: 488'),
     'blender': (2, 78, 0),
