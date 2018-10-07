@@ -14,9 +14,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 # blender info
 bl_info = {
-    'name': 'Name Stack Public',
+    'name': 'Name Stack',
     'author': 'proxe',
-    'version': (0, '8          Commit: 490'),
+    'version': (0, '8          Commit: 491'),
     'blender': (2, 78, 0),
     'location': '3D View > Tool Shelf > Name',
     'description': 'In panel datablock name stack with shortcut and batch name tools',
