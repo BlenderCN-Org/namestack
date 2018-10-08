@@ -16,7 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
     'name': 'Name Stack',
     'author': 'proxe',
-    'version': (0, '8          Commit: 491'),
+    'version': (0, '8          Commit: 500'),
     'blender': (2, 78, 0),
     'location': '3D View > Tool Shelf > Name',
     'description': 'In panel datablock name stack with shortcut and batch name tools',
