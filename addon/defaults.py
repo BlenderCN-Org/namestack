@@ -251,17 +251,12 @@ defaults = {
         'regex': False,
         'replace': '',
         'prefix': '',
-        'prefix on found': False,
         'suffix': '',
         'suffix last': False,
-        'suffix on found': False,
         'trim start': 0,
-        'trim start on found': False,
         'trim end': 0,
-        'trim end on found': False,
         'cut start': 0,
         'cut amount': 0,
-        'cut on found': False,
     },
 
     'copy name': {
