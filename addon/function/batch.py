@@ -3021,7 +3021,7 @@ def rename(self, context, oldName, option):
     isFound = nameCheck != oldName
 
     # isnt on found
-    if not option.onFound or isFound and option.onFound:
+    if not option.onFound or not option.find or isFound and option.onFound:
 
         # is custom
         if option.custom:
