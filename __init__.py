@@ -141,12 +141,7 @@ class preferences(AddonPreferences):
         row.operator('wm.auto_name_defaults', text='Auto Name')
 
         # operator; batch name defaults
-        op = row.operator('wm.batch_name_defaults', text='Batch Name')
-        op.quickBatch = False
-
-        # operator; batch name defaults
-        op = row.operator('wm.batch_name_defaults', text='Quick Batch')
-        op.quickBatch = False
+        row.operator('wm.batch_name_defaults', text='Batch Name')
 
         # operator; batch name copy
         row.operator('wm.copy_name_defaults', text='Transfer Name')

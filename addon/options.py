@@ -1805,11 +1805,25 @@ class batch:
             default = default['regex']
         )
 
+        # find only
+        findOnly = BoolProperty(
+            name = 'Find only',
+            description = 'Do not replace the found text if the replace field is empty',
+            default = default['find only']
+        )
+
         # replace
         replace = StringProperty(
             name = 'Replace',
             description = 'Replace found text with the text entered here',
             default = default['replace']
+        )
+
+        # on found
+        onFound = BoolProperty(
+            name = 'On found',
+            description = 'Prefix, suffix, trimming and cutting will only be performed on names that have been found',
+            default = default['on found']
         )
 
         # prefix
