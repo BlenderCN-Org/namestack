@@ -44,7 +44,7 @@ class save(Operator):
     '''
     bl_idname = 'wm.save_name_panel_defaults'
     bl_label = 'Save'
-    bl_description = 'Save current addon options as default and update panel locations'
+    bl_description = 'Save defaults'
     bl_options = {'INTERNAL'}
 
     # execute
@@ -119,87 +119,54 @@ class preferences(AddonPreferences):
 
     # draw
     def draw(self, context):
-
-        # layout
         layout = self.layout
 
-        # box
         box = layout.box()
 
-        box.label(text='Defaults:')
-
-        # row
-        row = box.row(align=True)
-
-        # scale y
-        row.scale_y = 1.5
-
-        # operator; name panel
-        row.operator('wm.name_panel_defaults', text='Panel')
-
-        # operator; auto name
-        row.operator('wm.auto_name_defaults', text='Auto Name')
-
-        # operator; batch name defaults
-        row.operator('wm.batch_name_defaults', text='Batch Name')
-
-        # operator; batch name copy
-        row.operator('wm.copy_name_defaults', text='Transfer Name')
-
-        # label
-        box.label(text='Name Panel Location:')
-
-        # row
-        row = box.row()
-
-        # location
-        row.prop(context.scene.NamePanel, 'location', expand=True)
-
-        # label
-        box.label(text='Datablock Panel Location:')
-
-        # row
-        row = box.row()
-
-        # location
-        row.prop(context.window_manager.PropertyPanel, 'location', expand=True)
         box.separator()
 
-        # row
+        split = box.split()
+        split.label(text='Name Panel Location:')
+
+        sub = split.row()
+        sub.prop(context.scene.NamePanel, 'location', expand=True)
+
+        split = box.split()
+        split.label(text='Datablock Panel Location:')
+
+        sub = split.row()
+        sub.prop(context.window_manager.PropertyPanel, 'location', expand=True)
+
+        box.separator()
+
         row = box.row()
+        row.label(text='Large Pop-ups:')
+        row.prop(context.window_manager.BatchShared, 'largePopups', text='')
 
-        # pop ups
-        row.prop(context.window_manager.BatchShared, 'largePopups')
+        box.separator()
 
-        # row
+        split = box.split(align=True)
+        split.label(text='Defaults:')
+
+        sub = split.row(align=True)
+        sub_column = sub.column(align=True)
+        sub_column.scale_y = 1.5
+        sub_column.operator('wm.name_panel_defaults', text='Panel')
+        sub_column.operator('wm.auto_name_defaults', text='Auto Name')
+
+        sub_column = sub.column(align=True)
+        sub_column.scale_y = 1.5
+        sub_column.operator('wm.batch_name_defaults', text='Batch Name')
+        sub_column.operator('wm.copy_name_defaults', text='Transfer Name')
+
+        box.separator()
+
         row = box.row()
-
-        # scale y
         row.scale_y = 1.5
-
-        # alignment right
         row.alignment = 'RIGHT'
-
-        # operator; save name panel defaults
         row.operator('wm.save_name_panel_defaults', text='Save')
 
-        # split
-        split = layout.split(align=True)
-
-        # scale y
-        split.scale_y = 2
-
-        # operator; url open
-        prop = split.operator('wm.url_open', text='Donate')
-
-        # donate
-        prop.url = 'https://paypal.me/proxe'
-
-        # operator; url open
-        prop = split.operator('wm.url_open', text='Github')
-
-        # github
-        prop.url = 'https://github.com/proc/name-stack'
+        box.separator()
 
 # register
 def register():

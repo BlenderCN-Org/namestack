@@ -16,7 +16,7 @@ class operator(Operator):
     '''
     bl_idname = 'wm.batch_name'
     bl_label = 'Batch Name'
-    bl_description = 'Batch name datablocks.'
+    bl_description = 'Batch name datablocks'
     bl_options = {'UNDO'}
 
     # tag
@@ -502,7 +502,6 @@ class operator(Operator):
 
         # regex
         sub.prop(option, 'regex', text='.*', toggle=True)
-        row.prop(option, 'findOnly', text='', icon='BORDERMOVE')
 
         # separate
         column.separator()
@@ -521,6 +520,7 @@ class operator(Operator):
 
         # replace
         row.prop(option, 'replace', text='', icon='FILE_REFRESH')
+        row.prop(option, 'findOnly', text='', icon='LAYER_USED' if option.findOnly else 'LAYER_ACTIVE')
         row.prop(option, 'onFound', text='', icon='ZOOM_SELECTED')
 
         # separate
@@ -623,6 +623,9 @@ class operator(Operator):
         row.prop(option, 'cutAmount')
 
         # separate
+        column.separator()
+        column.separator()
+        column.separator()
         column.separator()
 
         # sort

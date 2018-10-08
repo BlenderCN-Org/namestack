@@ -100,7 +100,7 @@ class options(PropertyGroup):
     # location
     location = EnumProperty(
         name = 'Name Panel Location',
-        description = 'The 3D view shelf to use for the name panel',
+        description = 'The 3D view shelf to use for the name panel (Requires Restart)',
         items = [
             ('TOOLS', 'Tool Shelf', 'Places the name panel in the tool shelf under the tab labeled \'Name\''),
             ('UI', 'Property Shelf', 'Places the name panel in the property shelf.')
@@ -325,7 +325,7 @@ class properties(PropertyGroup):
     # location
     location = EnumProperty(
         name = 'Property Panel Location',
-        description = 'The 3D view shelf to use for the properties panel',
+        description = 'The 3D view shelf to use for the properties panel (Requires Restart)',
         items = [
             ('TOOLS', 'Tool Shelf', 'Places the properties panel in the tool shelf under the tab labeled \'Name\''),
             ('UI', 'Property Shelf', 'Places the properties panel in the property shelf.')

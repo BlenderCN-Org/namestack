@@ -11,7 +11,7 @@ class operator(Operator):
     '''
     bl_idname = 'wm.name_panel_defaults'
     bl_label = 'Name Panel Defaults'
-    bl_description = 'Current settings for name panel.'
+    bl_description = 'Current settings for name panel'
     bl_options = {'INTERNAL'}
 
     # check
