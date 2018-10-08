@@ -1598,6 +1598,40 @@ class block:
                     # bone
                     Bone(self, context, layout, context.active_bone, context.active_object, panel)
 
+                    # constraints
+                    try: constraints = [item.name for item in context.active_pose_bone.constraints]
+                    except: constraints = []
+
+                    # is bone constraints
+                    if panel.boneConstraints:
+
+                        # is mode pose
+                        if object.mode in 'POSE':
+
+                            # bone
+                            bone = context.active_pose_bone
+
+                            # is bone
+                            if bone:
+
+                                # for constraint
+                                for constraint in bone.constraints:
+
+                                    # is search
+                                    if search == '' or re.search(search, constraint.name, re.I):
+
+                                        # constraint
+                                        Constraint(self, context, layout, constraint, object, bone, panel)
+
+                                # is constraints
+                                if constraints != []:
+
+                                    # row
+                                    row = layout.row()
+
+                                    # separate
+                                    row.separator()
+
             # is pin active bone
             if option.pinActiveBone and panel.displayBones:
 
@@ -1721,7 +1755,7 @@ class block:
                                                     row.separator()
 
             # isnt pin active bone
-            else:
+            elif panel.displayBones:
 
                 # is display bones
                 if panel.displayBones:
