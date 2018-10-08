@@ -652,7 +652,6 @@ class operator(Operator):
 
         # prefix
         row.prop(option, 'prefix', text='', icon='LOOP_BACK')
-        row.prop(option, 'prefixOnFound', text='', icon='VIEWZOOM')
 
         # separate
         column.separator()
@@ -674,7 +673,6 @@ class operator(Operator):
 
         # suffix last
         row.prop(option, 'suffixLast', text='', icon='FORWARD')
-        row.prop(option, 'suffixOnFound', text='', icon='VIEWZOOM')
 
         # # suffix last
         # row.prop(option, 'suffixLast', text='', icon='AUTO')
@@ -687,7 +685,7 @@ class operator(Operator):
         column.separator()
 
         # row
-        row = column.row(align=True)
+        row = column.row()
 
         # label
         row.label(text='Trim Start:')
@@ -699,7 +697,7 @@ class operator(Operator):
         column.separator()
 
         # row
-        row = column.row(align=True)
+        row = column.row()
 
         # label
         row.label(text='Trim End:')

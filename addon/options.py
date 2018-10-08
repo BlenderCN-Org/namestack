@@ -1819,13 +1819,6 @@ class batch:
             default = default['prefix']
         )
 
-        # prefix on found
-        prefixOnFound = BoolProperty(
-            name = 'Prefix on found',
-            description = 'Prefix the name only when it is found & replaced',
-            default = default['prefix on found']
-        )
-
         # suffix
         suffix = StringProperty(
             name = 'Suffix',
@@ -1838,13 +1831,6 @@ class batch:
             name = 'Suffix Last',
             description = 'Force the suffix to be placed last when recounting duplicate names',
             default = default['suffix last']
-        )
-
-        # suffix on found
-        suffixOnFound = BoolProperty(
-            name = 'Suffix on found',
-            description = 'Suffix the name only when it is found & replaced',
-            default = default['suffix on found']
         )
 
         # trim start
