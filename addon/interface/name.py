@@ -370,9 +370,7 @@ def filters(self, context, layout, panel):
         if panel.hideReplace:
 
             # operator; batch name
-            op = row.operator('wm.batch_name', text='', icon='SORTALPHA')
-            op.simple = False
-            op.quickBatch = False
+            row.operator('wm.batch_name', text='', icon='SORTALPHA')
 
         else:
 
@@ -389,14 +387,10 @@ def filters(self, context, layout, panel):
             sub.scale_x = 0.15
 
             # operator; batch name
-            op = sub.operator('wm.batch_name', text='OK')
-            op.simple = True
-            op.quickBatch = False
+            sub.operator('wm.batch_name', text='OK')
 
             # operator; batch name
-            op = row.operator('wm.batch_name', text='', icon='SORTALPHA')
-            op.simple = False
-            op.quickBatch = False
+            row.operator('wm.batch_name', text='', icon='SORTALPHA')
 
     # is dispay names
     if panel.displayNames:
