@@ -735,11 +735,17 @@ def reset(context, panel, auto, names, name, copy):
         # prefix
         option.prefix = default['prefix']
 
+        # prefix on found
+        option.prefix = default['prefix on found']
+
         # suffix
         option.suffix = default['suffix']
 
         # suffix last
         option.suffixLast = default['suffix last']
+
+        # suffix on found
+        option.prefix = default['suffix on found']
 
         # trim start
         option.trimStart = default['trim start']

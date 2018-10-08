@@ -3634,12 +3634,11 @@ def rename(self, context, oldName, option):
             # new name
             newName = oldName
 
+        # trim end
+        newName = newName[:-option.trimEnd]
+
         # trim start
         newName = newName[option.trimStart:]
-
-        # trim end
-        if option.trimEnd > 0:
-            newName = newName[:-option.trimEnd]
 
         # cut
         newName = newName[:option.cutStart] + newName[option.cutStart+option.cutAmount:]
@@ -3654,12 +3653,24 @@ def rename(self, context, oldName, option):
             else:
                 newName = re.sub(re.escape(option.find), option.replace, newName)
 
-        # split numeral & suffix
-        try: newName = re.split(numeral, newName)[0] + option.suffix + re.search(numeral, newName).group(0) if not option.suffixLast else newName
-        except: newName = newName + option.suffix if not option.suffixLast else newName
+        # sub
+        sub = newName
 
-        # prefix
-        newName = option.prefix + newName
+        # is prefix on found
+        if option.prefixOnFound and sub != oldName or not option.prefixOnFound:
+
+            # prefix
+            newName = option.prefix + newName
+
+        # is suffix on found
+        if option.suffixOnFound and sub != oldName or not option.suffixOnFound:
+
+            # isnt suffix last
+            if not option.suffixLast:
+                try: newName = re.split(numeral, newName)[0] + option.suffix + re.search(numeral, newName).group(0)
+                except: newName += option.suffix
+            else:
+                newName += option.suffix
 
     # is simple
     else:
