@@ -1822,7 +1822,7 @@ class batch:
         # on found
         onFound = BoolProperty(
             name = 'On found',
-            description = 'Prefix, suffix, trimming and cutting will only be performed on names that have been found',
+            description = 'Custom name, prefix, suffix, trimming and cutting will only be performed on names that have been found',
             default = default['on found']
         )
 
