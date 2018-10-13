@@ -1488,7 +1488,7 @@ class block:
                         if slot.material != None:
 
                             # textures
-                            textures = [tslot.texture.name for tslot in slot.material.texture_slots if hasattr(tslot, 'texture')]
+                            textures = [tslot.texture.name for tslot in slot.material.texture_slots if hasattr(tslot, 'texture') and tslot.texture]
 
                             # is search
                             if search == '' or re.search(search, slot.material.name, re.I) or [re.search(search, item, re.I) for item in textures if re.search(search, item, re.I) != None]:
